@@ -29,6 +29,24 @@ on_inspect_widget(GtkWidget *grab_window, GdkEventButton *event,
 
 
 static void
+on_highlight_window_show(GtkWidget *window,
+                         ParasiteWindow *parasite)
+{
+   if (gtk_widget_is_composited(parasite->window))
+   {
+      gtk_window_set_opacity(GTK_WINDOW(parasite->highlight_window), 0.2);
+   }
+   else
+   {
+      /*
+       * TODO: Do something different when there's no compositing manager.
+       *       Draw a border or something.
+       */
+   }
+}
+
+
+static void
 ensure_highlight_window(ParasiteWindow *parasite)
 {
    GdkColor color;
@@ -44,17 +62,8 @@ ensure_highlight_window(ParasiteWindow *parasite)
    gtk_widget_modify_bg(parasite->highlight_window, GTK_STATE_NORMAL,
                         &color);
 
-   if (1 || gtk_widget_is_composited(parasite->window))
-   {
-      gtk_window_set_opacity(GTK_WINDOW(parasite->highlight_window), 0.2);
-   }
-   else
-   {
-      /*
-       * TODO: Do something different when there's no compositing manager.
-       *       Draw a border or something.
-       */
-   }
+   g_signal_connect(G_OBJECT(parasite->highlight_window), "show",
+                    G_CALLBACK(on_highlight_window_show), parasite);
 }
 
 
