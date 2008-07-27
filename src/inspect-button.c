@@ -160,24 +160,20 @@ void
 gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget)
 {
    gint x, y, width, height;
-   GtkWidget *toplevel;
+   GdkWindow *parent_window;
 
-   if (!GTK_WIDGET_VISIBLE(widget))
+   if (!GTK_WIDGET_VISIBLE(widget) || !GTK_WIDGET_MAPPED(widget))
       return;
 
    ensure_highlight_window(parasite);
 
-   x = widget->allocation.x;
-   y = widget->allocation.y;
+   parent_window = gtk_widget_get_parent_window(widget);
+   gdk_window_get_origin(parent_window, &x, &y);
 
-   toplevel = gtk_widget_get_toplevel(widget);
-
-   if (toplevel != widget && GTK_WIDGET_TOPLEVEL(toplevel))
+   if (parent_window != widget->window)
    {
-      gint root_x, root_y;
-      gdk_window_get_origin(toplevel->window, &root_x, &root_y);
-      x += root_x;
-      y += root_y;
+      x += widget->allocation.x;
+      y += widget->allocation.y;
    }
 
    width = widget->allocation.width;

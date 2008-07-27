@@ -1,13 +1,17 @@
 #include "parasite.h"
 
+#include <gdk/gdkx.h>
+
 
 enum
 {
    WIDGET,
    WIDGET_TYPE,
    WIDGET_DETAIL,
-   WIDGET_VISIBLE,
    WIDGET_REALIZED,
+   WIDGET_VISIBLE,
+   WIDGET_MAPPED,
+   WIDGET_WINDOW,
    WIDGET_ADDRESS,
    NUM_COLUMNS
 };
@@ -49,7 +53,8 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 
    model = gtk_tree_store_new(NUM_COLUMNS,
                               G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING,
-                              G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_STRING);
+                              G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
+                              G_TYPE_STRING, G_TYPE_STRING);
 
    treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
    gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
@@ -74,18 +79,34 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
    gtk_tree_view_column_set_resizable(column, TRUE);
 
    renderer = gtk_cell_renderer_toggle_new();
+   column = gtk_tree_view_column_new_with_attributes("Realized",
+                                                     renderer,
+                                                     "active", WIDGET_REALIZED,
+                                                     NULL);
+   gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+
+   renderer = gtk_cell_renderer_toggle_new();
+   column = gtk_tree_view_column_new_with_attributes("Mapped",
+                                                     renderer,
+                                                     "active", WIDGET_MAPPED,
+                                                     NULL);
+   gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+
+   renderer = gtk_cell_renderer_toggle_new();
    column = gtk_tree_view_column_new_with_attributes("Visible",
                                                      renderer,
                                                      "active", WIDGET_VISIBLE,
                                                      NULL);
    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
 
-   renderer = gtk_cell_renderer_toggle_new();
-   column = gtk_tree_view_column_new_with_attributes("Realized",
+   renderer = gtk_cell_renderer_text_new();
+   column = gtk_tree_view_column_new_with_attributes("X Window",
                                                      renderer,
-                                                     "active", WIDGET_REALIZED,
+                                                     "text", WIDGET_WINDOW,
                                                      NULL);
    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+   gtk_tree_view_column_set_resizable(column, TRUE);
 
    renderer = gtk_cell_renderer_text_new();
    column = gtk_tree_view_column_new_with_attributes("Pointer address",
@@ -106,6 +127,7 @@ append_widget(GtkTreeStore *model,
    GtkTreeIter iter;
    const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
    const char *detail = "";
+   char *window_info;
    char *address;
    GList *l;
 
@@ -116,6 +138,16 @@ append_widget(GtkTreeStore *model,
    else if (GTK_IS_WINDOW(widget))
       detail = gtk_window_get_title(GTK_WINDOW(widget));
 
+   if (widget->window)
+   {
+      window_info = g_strdup_printf("%p (XID 0x%x)", widget->window,
+                                    (int)GDK_WINDOW_XID(widget->window));
+   }
+   else
+   {
+      window_info = g_strdup("");
+   }
+
    address = g_strdup_printf("%p", widget);
 
    gtk_tree_store_append(model, &iter, parent_iter);
@@ -123,11 +155,14 @@ append_widget(GtkTreeStore *model,
                       WIDGET, widget,
                       WIDGET_TYPE, class_name,
                       WIDGET_DETAIL, detail,
-                      WIDGET_VISIBLE, GTK_WIDGET_VISIBLE(widget),
                       WIDGET_REALIZED, GTK_WIDGET_REALIZED(widget),
+                      WIDGET_MAPPED, GTK_WIDGET_MAPPED(widget),
+                      WIDGET_VISIBLE, GTK_WIDGET_VISIBLE(widget),
+                      WIDGET_WINDOW, window_info,
                       WIDGET_ADDRESS, address,
                       -1);
 
+   g_free(window_info);
    g_free(address);
 
    if (GTK_IS_CONTAINER(widget))
