@@ -82,6 +82,7 @@ gtkparasite_window_create()
     ParasiteWindow *window;
     GtkWidget *main_vbox;
     GtkWidget *vpaned;
+    char *title;
 
     window = g_new0(ParasiteWindow, 1);
 
@@ -90,8 +91,11 @@ gtkparasite_window_create()
      */
     window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window->window), 1000, 500);
-    gtk_window_set_title(GTK_WINDOW(window->window), "Parasite");
     gtk_widget_show(window->window);
+
+    title = g_strdup_printf("Parasite - %s", g_get_application_name());
+    gtk_window_set_title(GTK_WINDOW(window->window), title);
+    g_free(title);
 
     main_vbox = gtk_vbox_new(FALSE, 0);
     gtk_widget_show(main_vbox);
