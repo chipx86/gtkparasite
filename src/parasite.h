@@ -16,6 +16,8 @@ typedef struct
 
     GdkWindow *selected_window;
 
+    gboolean edit_mode_enabled;
+
     int flash_count;
     int flash_cnx;
 

@@ -17,6 +17,27 @@ enum
 };
 
 
+#define GET_PARASITE(widget) g_object_get_data(G_OBJECT(widget), "parasite")
+
+
+#if 0
+static GtkWidget *
+get_widget_from_path(GtkWidget *treeview,
+                     GtkTreePath *path)
+{
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+    GtkTreeIter iter;
+    GtkWidget *widget = NULL;
+
+    gtk_tree_model_get_iter(model, &iter, path);
+    gtk_tree_model_get(model, &iter,
+                       WIDGET, &widget,
+                       -1);
+
+    return widget;
+}
+#endif
+
 static void
 on_widget_selected(GtkTreeSelection *selection,
                    ParasiteWindow *parasite)
@@ -42,6 +63,69 @@ on_widget_selected(GtkTreeSelection *selection,
     }
 }
 
+static void
+handle_toggle(GtkCellRendererToggle *toggle,
+              char *path_str,
+              GtkWidget *treeview,
+              int column,
+              void (*enable_func)(GtkWidget*),
+              void (*disable_func)(GtkWidget*))
+{
+    ParasiteWindow *parasite = GET_PARASITE(treeview);
+    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
+    GtkTreeIter iter;
+    GtkWidget *widget;
+    gboolean new_active = !gtk_cell_renderer_toggle_get_active(toggle);
+
+    if (!parasite->edit_mode_enabled)
+        return;
+
+    gtk_tree_model_get_iter(model, &iter,
+                            gtk_tree_path_new_from_string(path_str));
+    gtk_tree_model_get(model, &iter,
+                       WIDGET, &widget,
+                       -1);
+
+    if (new_active)
+        enable_func(widget);
+    else
+        disable_func(widget);
+
+    gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+                       column, new_active,
+                       -1);
+}
+
+static void
+on_toggle_realize(GtkCellRendererToggle *toggle,
+                  char *path_str,
+                  GtkWidget *treeview)
+{
+    handle_toggle(toggle, path_str, treeview, WIDGET_REALIZED,
+                  gtk_widget_realize,
+                  gtk_widget_unrealize);
+}
+
+static void
+on_toggle_visible(GtkCellRendererToggle *toggle,
+                  char *path_str,
+                  GtkWidget *treeview)
+{
+    handle_toggle(toggle, path_str, treeview, WIDGET_VISIBLE,
+                  gtk_widget_show,
+                  gtk_widget_hide);
+}
+
+static void
+on_toggle_map(GtkCellRendererToggle *toggle,
+              char *path_str,
+              GtkWidget *treeview)
+{
+    handle_toggle(toggle, path_str, treeview, WIDGET_MAPPED,
+                  gtk_widget_map,
+                  gtk_widget_unmap);
+}
+
 GtkWidget *
 gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 {
@@ -59,6 +143,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
     gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview), WIDGET_DETAIL);
+    g_object_set_data(G_OBJECT(treeview), "parasite", parasite);
 
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
     g_signal_connect(G_OBJECT(sel), "changed",
@@ -79,26 +164,35 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     gtk_tree_view_column_set_resizable(column, TRUE);
 
     renderer = gtk_cell_renderer_toggle_new();
+    g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Realized",
                                                       renderer,
                                                       "active", WIDGET_REALIZED,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    g_signal_connect(G_OBJECT(renderer), "toggled",
+                     G_CALLBACK(on_toggle_realize), treeview);
 
 
     renderer = gtk_cell_renderer_toggle_new();
+    g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Mapped",
                                                       renderer,
                                                       "active", WIDGET_MAPPED,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    g_signal_connect(G_OBJECT(renderer), "toggled",
+                     G_CALLBACK(on_toggle_map), treeview);
 
     renderer = gtk_cell_renderer_toggle_new();
+    g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Visible",
                                                       renderer,
                                                       "active", WIDGET_VISIBLE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    g_signal_connect(G_OBJECT(renderer), "toggled",
+                     G_CALLBACK(on_toggle_visible), treeview);
 
     renderer = gtk_cell_renderer_text_new();
     column = gtk_tree_view_column_new_with_attributes("X Window",

@@ -39,6 +39,16 @@ create_prop_list_pane(ParasiteWindow *parasite)
 }
 
 static void
+on_edit_mode_toggled(GtkWidget *toggle_button,
+                     ParasiteWindow *parasite)
+{
+    gboolean active =
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button));
+
+    parasite->edit_mode_enabled = active;
+}
+
+static void
 create_top_pane(ParasiteWindow *parasite,
                 GtkWidget *paned)
 {
@@ -57,10 +67,18 @@ create_top_pane(ParasiteWindow *parasite,
     gtk_widget_show(bbox);
     gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 0);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_START);
+    gtk_box_set_spacing(GTK_BOX(bbox), 6);
 
     button = gtkparasite_inspect_button_new(parasite);
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
+
+    button = gtk_toggle_button_new_with_mnemonic("_Edit Mode");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
+
+    g_signal_connect(G_OBJECT(button), "toggled",
+                     G_CALLBACK(on_edit_mode_toggled), parasite);
 
     hpaned = gtk_hpaned_new();
     gtk_widget_show(hpaned);
