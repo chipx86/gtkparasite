@@ -121,8 +121,8 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 
 static void
 append_widget(GtkTreeStore *model,
-                  GtkWidget *widget,
-                  GtkTreeIter *parent_iter)
+              GtkWidget *widget,
+              GtkTreeIter *parent_iter)
 {
     GtkTreeIter iter;
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
