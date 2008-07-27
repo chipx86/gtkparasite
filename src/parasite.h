@@ -7,17 +7,17 @@
 
 typedef struct
 {
-   GtkWidget *window;
-   GtkWidget *widget_tree;
-   GtkWidget *prop_list;
+    GtkWidget *window;
+    GtkWidget *widget_tree;
+    GtkWidget *prop_list;
 
-   GtkWidget *grab_window;
-   GtkWidget *highlight_window;
+    GtkWidget *grab_window;
+    GtkWidget *highlight_window;
 
-   GdkWindow *selected_window;
+    GdkWindow *selected_window;
 
-   int flash_count;
-   int flash_cnx;
+    int flash_count;
+    int flash_cnx;
 
 } ParasiteWindow;
 
@@ -34,8 +34,10 @@ void gtkparasite_widget_tree_select_widget(GtkWidget *widget_tree,
                                            GtkWidget *window);
 
 GtkWidget *gtkparasite_prop_list_new(ParasiteWindow *parasite);
-void gtkparasite_prop_list_set_widget(GtkWidget *prop_list, GtkWidget *widget);
+void gtkparasite_prop_list_set_widget(GtkWidget *prop_list,
+                                      GtkWidget *widget);
 
 
 #endif // _GTKPARASITE_H_
 
+// vim: set et ts=4:
