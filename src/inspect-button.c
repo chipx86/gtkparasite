@@ -186,12 +186,8 @@ gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget)
 
     parent_window = gtk_widget_get_parent_window(widget);
     gdk_window_get_origin(parent_window, &x, &y);
-
-    if (parent_window != widget->window)
-    {
-        x += widget->allocation.x;
-        y += widget->allocation.y;
-    }
+    x += widget->allocation.x;
+    y += widget->allocation.y;
 
     width = widget->allocation.width;
     height = widget->allocation.height;
