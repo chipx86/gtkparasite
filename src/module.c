@@ -1,18 +1,56 @@
 #include <glib.h>
+#include <gmodule.h>
 #include <Python.h>
 
 
 int
 gtk_module_init(gint argc, char *argv[])
 {
-    PyObject *module_name;
+    PyObject *mdict;
+    PyObject *func;
     PyObject *module;
     int retcode = 1;
+    char *new_argv[] = {"gtkparasite", NULL};
+    GModule *libpython;
+
+    libpython = g_module_open(PY_LIB_LOC "/libpython" PYTHON_VERSION "."
+                              G_MODULE_SUFFIX, 0);
+
+    if (libpython == NULL)
+    {
+        g_warning("Unable to open libpython: %s", g_module_error());
+    }
 
     Py_Initialize();
 
-    module_name = PyString_FromString("gtkparasite");
-    module = PyImport_Import(module_name);
+    if (PyErr_Occurred())
+    {
+        PyErr_Print();
+        return 1;
+    }
+
+    PySys_SetArgv(1, new_argv);
+
+    module = PyImport_ImportModule("pygtk");
+
+    if (module == NULL)
+    {
+        PyErr_Print();
+        return 1;
+    }
+
+    mdict = PyModule_GetDict(module);
+    func = PyDict_GetItemString(mdict, "require");
+    PyObject_CallObject(func,
+                        Py_BuildValue("(S)", PyString_FromString("2.0")));
+
+    if (PyErr_Occurred())
+    {
+        PyErr_Print();
+        return 1;
+    }
+
+    module = PyImport_ImportModule("gtkparasite");
 
     if (module == NULL)
     {
@@ -20,8 +58,8 @@ gtk_module_init(gint argc, char *argv[])
     }
     else
     {
-        PyObject *mdict = PyModule_GetDict(module);
-        PyObject *func = PyDict_GetItemString(mdict, "run");
+        mdict = PyModule_GetDict(module);
+        func = PyDict_GetItemString(mdict, "run");
 
         if (func == NULL || !PyCallable_Check(func))
         {
@@ -30,7 +68,8 @@ gtk_module_init(gint argc, char *argv[])
         }
         else
         {
-            PyObject *result = PyObject_CallFunction(func, "");
+            PyObject *result = PyObject_CallFunction(func, "(s)",
+                                                     g_get_application_name());
 
             if (result != NULL)
             {
@@ -42,8 +81,8 @@ gtk_module_init(gint argc, char *argv[])
         Py_XDECREF(module);
     }
 
-    Py_XDECREF(module_name);
-    Py_Finalize();
+    if (Py_IsInitialized())
+        Py_Finalize();
 
     return retcode;
 }

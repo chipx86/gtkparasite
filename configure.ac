@@ -53,9 +53,9 @@ AC_EXEEXT
 
 AM_PATH_PYTHON(2.4.0)
 AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+AM_CHECK_PYTHON_LIBS(,[AC_MSG_ERROR(could not find Python libs)])
 
-
-PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
+PKG_CHECK_MODULES(GTK, [pygtk-2.0 >= 2.12, gtk+-2.0 >= 2.12.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
@@ -74,6 +74,7 @@ AC_CONFIG_FILES([
 Makefile
 src/Makefile
 src/gtkparasite/Makefile
+src/gtkparasite/ui/Makefile
 ])
 
 AC_OUTPUT
