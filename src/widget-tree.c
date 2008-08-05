@@ -18,6 +18,14 @@ enum
 };
 
 
+typedef struct
+{
+    ParasiteWindow *window;
+    GtkTreeIter *model;
+
+} WidgetTreeData;
+
+
 #define GET_PARASITE(widget) g_object_get_data(G_OBJECT(widget), "parasite")
 
 
