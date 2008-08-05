@@ -36,7 +36,7 @@ echo "Generating configuration files for $PACKAGE, please wait..."
 echo "  libtoolize --copy --force"
 libtoolize --copy --force
 echo "  aclocal $ACLOCAL_FLAGS"
-aclocal $ACLOCAL_FLAGS
+aclocal $ACLOCAL_FLAGS -I m4
 echo "  autoheader"
 autoheader
 echo "  automake --add-missing"
