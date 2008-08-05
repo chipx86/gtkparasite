@@ -49,6 +49,14 @@ on_edit_mode_toggled(GtkWidget *toggle_button,
 }
 
 static void
+on_show_graphic_updates_toggled(GtkWidget *toggle_button,
+                                ParasiteWindow *parasite)
+{
+    gdk_window_set_debug_updates(
+        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button)));
+}
+
+static void
 create_top_pane(ParasiteWindow *parasite,
                 GtkWidget *paned)
 {
@@ -79,6 +87,13 @@ create_top_pane(ParasiteWindow *parasite,
 
     g_signal_connect(G_OBJECT(button), "toggled",
                      G_CALLBACK(on_edit_mode_toggled), parasite);
+
+    button = gtk_toggle_button_new_with_mnemonic("_Show Graphic Updates");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
+
+    g_signal_connect(G_OBJECT(button), "toggled",
+                     G_CALLBACK(on_show_graphic_updates_toggled), parasite);
 
     hpaned = gtk_hpaned_new();
     gtk_widget_show(hpaned);
