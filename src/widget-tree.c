@@ -6,6 +6,7 @@
 enum
 {
     WIDGET,
+    WIDGET_CONNECTION,
     WIDGET_TYPE,
     WIDGET_DETAIL,
     WIDGET_REALIZED,
@@ -126,6 +127,16 @@ on_toggle_map(GtkCellRendererToggle *toggle,
                   gtk_widget_unmap);
 }
 
+static void
+on_widget_updated(GtkWidget *widget, GtkTreeIter *iter)
+{
+    gtk_tree_store_set(model, iter,
+                       WIDGET_REALIZED, GTK_WIDGET_REALIZED(widget),
+                       WIDGET_MAPPED, GTK_WIDGET_MAPPED(widget),
+                       WIDGET_VISIBLE, GTK_WIDGET_VISIBLE(widget),
+                       -1);
+}
+
 GtkWidget *
 gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 {
@@ -136,9 +147,11 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     GtkTreeSelection *sel;
 
     model = gtk_tree_store_new(NUM_COLUMNS,
-                               G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING,
-                               G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
-                               G_TYPE_STRING, G_TYPE_STRING);
+                               G_TYPE_POINTER, G_TYPE_POINTER,
+                               G_TYPE_STRING, G_TYPE_STRING,
+                               G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
+                               G_TYPE_BOOLEAN, G_TYPE_STRING,
+                               G_TYPE_STRING);
 
     treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
@@ -218,12 +231,17 @@ append_widget(GtkTreeStore *model,
               GtkWidget *widget,
               GtkTreeIter *parent_iter)
 {
+    static const char *SIGNALS[] = {
+        "map", "unmap", "realize", "unrealize", "show", "hide"
+    };
+
     GtkTreeIter iter;
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
     const char *detail = "";
     char *window_info;
     char *address;
-    GList *l;
+    GList *connections = NULL;
+    int i;
 
     if (GTK_IS_LABEL(widget))
         detail = gtk_label_get_text(GTK_LABEL(widget));
@@ -247,11 +265,9 @@ append_widget(GtkTreeStore *model,
     gtk_tree_store_append(model, &iter, parent_iter);
     gtk_tree_store_set(model, &iter,
                        WIDGET, widget,
+                       WIDGET_CONNECTION, connections,
                        WIDGET_TYPE, class_name,
                        WIDGET_DETAIL, detail,
-                       WIDGET_REALIZED, GTK_WIDGET_REALIZED(widget),
-                       WIDGET_MAPPED, GTK_WIDGET_MAPPED(widget),
-                       WIDGET_VISIBLE, GTK_WIDGET_VISIBLE(widget),
                        WIDGET_WINDOW, window_info,
                        WIDGET_ADDRESS, address,
                        -1);
@@ -259,8 +275,19 @@ append_widget(GtkTreeStore *model,
     g_free(window_info);
     g_free(address);
 
+    for (i = 0; i < G_N_ELEMENTS(SIGNALS); i++)
+    {
+        connections = g_list_append(connections,
+            g_signal_connect(G_OBJECT(widget), SIGNALS[i],
+                             G_CALLBACK(on_widget_updated), iter));
+    }
+
+    on_widget_updated(iter);
+
     if (GTK_IS_CONTAINER(widget))
     {
+        GList *l;
+
         for (l = gtk_container_get_children(GTK_CONTAINER(widget));
              l != NULL;
              l = l->next)
@@ -270,6 +297,29 @@ append_widget(GtkTreeStore *model,
     }
 }
 
+static gboolean
+delete_signals(GtkTreeModel *model,
+               GtkTreePath *path,
+               GtkTreeIter *iter,
+               gpointer data)
+{
+    GtkWidget *widget;
+    GList *connections;
+    GList *l;
+
+    gtk_tree_model_get(model, iter,
+                       WIDGET, &widget,
+                       WIDGET_CONNECTION, &connections,
+                       -1);
+
+    for (l = connections; l != NULL; l = l->next)
+    {
+        g_signal_handler_disconnect(widget, GPOINTER_TO_INT(l->data));
+    }
+
+    return FALSE;
+}
+
 void
 gtkparasite_widget_tree_scan(GtkWidget *widget_tree,
                              GtkWidget *window)
@@ -277,6 +327,7 @@ gtkparasite_widget_tree_scan(GtkWidget *widget_tree,
     GtkTreeStore *model =
         GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget_tree)));
 
+    gtk_tree_model_foreach(GTK_TREE_MODEL(model), delete_signals, NULL);
     gtk_tree_store_clear(model);
     append_widget(model, window, NULL);
 
