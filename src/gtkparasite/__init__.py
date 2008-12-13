@@ -7,7 +7,6 @@ def run(appname):
     """
     Displays the main Parasite window.
     """
-    print "Run"
     window = ParasiteWindow(appname)
     window.show()
 
