@@ -16,10 +16,15 @@ typedef struct
 
    GdkWindow *selected_window;
 
+   int flash_count;
+   int flash_cnx;
+
 } ParasiteWindow;
 
 
 void gtkparasite_window_create();
+
+void gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget);
 
 GtkWidget *gtkparasite_inspect_button_new(ParasiteWindow *parasite);
 

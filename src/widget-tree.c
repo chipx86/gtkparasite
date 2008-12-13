@@ -32,6 +32,9 @@ on_widget_selected(GtkTreeSelection *selection,
                          -1);
 
       gtkparasite_prop_list_set_widget(parasite->prop_list, widget);
+
+      /* Flash the widget. */
+      gtkparasite_flash_widget(parasite, widget);
    }
 }
 
