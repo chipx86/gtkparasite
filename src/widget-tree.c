@@ -14,6 +14,7 @@ enum
     WIDGET_MAPPED,
     WIDGET_WINDOW,
     WIDGET_ADDRESS,
+    ROW_COLOR,
     NUM_COLUMNS
 };
 
@@ -141,7 +142,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     model = gtk_tree_store_new(NUM_COLUMNS,
                                G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING,
                                G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
-                               G_TYPE_STRING, G_TYPE_STRING);
+                               G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
     treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
@@ -156,6 +157,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
     column = gtk_tree_view_column_new_with_attributes("Widget", renderer,
                                                       "text", WIDGET_TYPE,
+                                                      "foreground", ROW_COLOR,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -164,6 +166,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
     column = gtk_tree_view_column_new_with_attributes("Name", renderer,
                                                       "text", WIDGET_NAME,
+                                                      "foreground", ROW_COLOR,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -216,6 +219,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     column = gtk_tree_view_column_new_with_attributes("X Window",
                                                       renderer,
                                                       "text", WIDGET_WINDOW,
+                                                      "foreground", ROW_COLOR,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -228,6 +232,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     column = gtk_tree_view_column_new_with_attributes("Pointer address",
                                                       renderer,
                                                       "text", WIDGET_ADDRESS,
+                                                      "foreground", ROW_COLOR,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -243,19 +248,30 @@ append_widget(GtkTreeStore *model,
     GtkTreeIter iter;
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
     const char *name;
+    const char *row_color;
     char *window_info;
     char *address;
+    gboolean realized;
+    gboolean mapped;
+    gboolean visible;
     GList *l;
 
     name = gtk_widget_get_name(widget);
     if (name == NULL || strcmp(name, class_name) == 0) {
-        if (GTK_IS_LABEL(widget)) {
+        if (GTK_IS_LABEL(widget))
+        {
             name = gtk_label_get_text(GTK_LABEL(widget));
-        } else if (GTK_IS_BUTTON(widget)) {
+        }
+        else if (GTK_IS_BUTTON(widget))
+        {
             name = gtk_button_get_label(GTK_BUTTON(widget));
-        } else if (GTK_IS_WINDOW(widget)) {
+        }
+        else if (GTK_IS_WINDOW(widget))
+        {
             name = gtk_window_get_title(GTK_WINDOW(widget));
-        } else {
+        }
+        else
+        {
             name = "";
         }
     }
@@ -272,16 +288,23 @@ append_widget(GtkTreeStore *model,
 
     address = g_strdup_printf("%p", widget);
 
+    realized = GTK_WIDGET_REALIZED(widget);
+    mapped = GTK_WIDGET_MAPPED(widget);
+    visible = GTK_WIDGET_VISIBLE(widget);
+
+    row_color = (realized && mapped && visible) ? "black" : "grey";
+
     gtk_tree_store_append(model, &iter, parent_iter);
     gtk_tree_store_set(model, &iter,
                        WIDGET, widget,
                        WIDGET_TYPE, class_name,
                        WIDGET_NAME, name,
-                       WIDGET_REALIZED, GTK_WIDGET_REALIZED(widget),
-                       WIDGET_MAPPED, GTK_WIDGET_MAPPED(widget),
-                       WIDGET_VISIBLE, GTK_WIDGET_VISIBLE(widget),
+                       WIDGET_REALIZED, realized,
+                       WIDGET_MAPPED, mapped,
+                       WIDGET_VISIBLE, visible,
                        WIDGET_WINDOW, window_info,
                        WIDGET_ADDRESS, address,
+                       ROW_COLOR, row_color,
                        -1);
 
     g_free(window_info);
