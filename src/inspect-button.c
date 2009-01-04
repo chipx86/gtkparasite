@@ -185,23 +185,25 @@ gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget)
     ensure_highlight_window(parasite);
 
     parent_window = gtk_widget_get_parent_window(widget);
-    gdk_window_get_origin(parent_window, &x, &y);
-    x += widget->allocation.x;
-    y += widget->allocation.y;
+    if (parent_window != NULL) {
+        gdk_window_get_origin(parent_window, &x, &y);
+        x += widget->allocation.x;
+        y += widget->allocation.y;
 
-    width = widget->allocation.width;
-    height = widget->allocation.height;
+        width = widget->allocation.width;
+        height = widget->allocation.height;
 
-    gtk_window_move(GTK_WINDOW(parasite->highlight_window), x, y);
-    gtk_window_resize(GTK_WINDOW(parasite->highlight_window), width, height);
-    gtk_widget_show(parasite->highlight_window);
+        gtk_window_move(GTK_WINDOW(parasite->highlight_window), x, y);
+        gtk_window_resize(GTK_WINDOW(parasite->highlight_window), width, height);
+        gtk_widget_show(parasite->highlight_window);
 
-    if (parasite->flash_cnx != 0)
-        g_source_remove(parasite->flash_cnx);
+        if (parasite->flash_cnx != 0)
+            g_source_remove(parasite->flash_cnx);
 
-    parasite->flash_count = 0;
-    parasite->flash_cnx = g_timeout_add(150, (GSourceFunc)on_flash_timeout,
-                                        parasite);
+        parasite->flash_count = 0;
+        parasite->flash_cnx = g_timeout_add(150, (GSourceFunc)on_flash_timeout,
+                                            parasite);
+    }
 }
 
 // vim: set et ts=4:
