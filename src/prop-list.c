@@ -16,6 +16,7 @@ gtkparasite_prop_list_new(ParasiteWindow *parasite)
     GtkWidget *treeview;
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
+    double text_scale = 0.8;
 
     model = gtk_list_store_new(NUM_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 
@@ -24,6 +25,7 @@ gtkparasite_prop_list_new(ParasiteWindow *parasite)
     gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview), NAME);
 
     renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
     column = gtk_tree_view_column_new_with_attributes("Property", renderer,
                                                       "text", NAME,
                                                       NULL);
@@ -33,6 +35,7 @@ gtkparasite_prop_list_new(ParasiteWindow *parasite)
     gtk_tree_view_column_set_sort_column_id(column, NAME);
 
     renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
     column = gtk_tree_view_column_new_with_attributes("Value", renderer,
                                                       "text", VALUE,
                                                       NULL);

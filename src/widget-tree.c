@@ -134,6 +134,8 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
     GtkTreeSelection *sel;
+    double text_scale = 0.8;
+    gint checkbox_size = (gint)(13 * text_scale); // 13 is the default size
 
     model = gtk_tree_store_new(NUM_COLUMNS,
                                G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING,
@@ -150,6 +152,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
                      G_CALLBACK(on_widget_selected), parasite);
 
     renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
     column = gtk_tree_view_column_new_with_attributes("Widget", renderer,
                                                       "text", WIDGET_TYPE,
                                                       NULL);
@@ -157,6 +160,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     gtk_tree_view_column_set_resizable(column, TRUE);
 
     renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
     column = gtk_tree_view_column_new_with_attributes("Detail", renderer,
                                                       "text", WIDGET_DETAIL,
                                                       NULL);
@@ -164,7 +168,10 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     gtk_tree_view_column_set_resizable(column, TRUE);
 
     renderer = gtk_cell_renderer_toggle_new();
-    g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
+    g_object_set(G_OBJECT(renderer),
+                 "activatable", TRUE,
+                 "indicator-size", checkbox_size,
+                 NULL);
     column = gtk_tree_view_column_new_with_attributes("Realized",
                                                       renderer,
                                                       "active", WIDGET_REALIZED,
@@ -175,7 +182,10 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 
 
     renderer = gtk_cell_renderer_toggle_new();
-    g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
+    g_object_set(G_OBJECT(renderer),
+                 "activatable", TRUE,
+                 "indicator-size", checkbox_size,
+                 NULL);
     column = gtk_tree_view_column_new_with_attributes("Mapped",
                                                       renderer,
                                                       "active", WIDGET_MAPPED,
@@ -185,7 +195,10 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
                      G_CALLBACK(on_toggle_map), treeview);
 
     renderer = gtk_cell_renderer_toggle_new();
-    g_object_set(G_OBJECT(renderer), "activatable", TRUE, NULL);
+    g_object_set(G_OBJECT(renderer),
+                 "activatable", TRUE,
+                 "indicator-size", checkbox_size,
+                 NULL);
     column = gtk_tree_view_column_new_with_attributes("Visible",
                                                       renderer,
                                                       "active", WIDGET_VISIBLE,
@@ -195,6 +208,10 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
                      G_CALLBACK(on_toggle_visible), treeview);
 
     renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer),
+                 "scale", text_scale,
+                 "family", "monospace",
+                 NULL);
     column = gtk_tree_view_column_new_with_attributes("X Window",
                                                       renderer,
                                                       "text", WIDGET_WINDOW,
@@ -203,6 +220,10 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
     gtk_tree_view_column_set_resizable(column, TRUE);
 
     renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer),
+                 "scale", text_scale,
+                 "family", "monospace",
+                 NULL);
     column = gtk_tree_view_column_new_with_attributes("Pointer address",
                                                       renderer,
                                                       "text", WIDGET_ADDRESS,
