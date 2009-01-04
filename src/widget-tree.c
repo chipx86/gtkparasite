@@ -1,5 +1,6 @@
 #include "parasite.h"
 
+#include <string.h>
 #include <gdk/gdkx.h>
 
 
@@ -7,7 +8,7 @@ enum
 {
     WIDGET,
     WIDGET_TYPE,
-    WIDGET_DETAIL,
+    WIDGET_NAME,
     WIDGET_REALIZED,
     WIDGET_VISIBLE,
     WIDGET_MAPPED,
@@ -144,7 +145,7 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 
     treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
-    gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview), WIDGET_DETAIL);
+    gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview), WIDGET_NAME);
     g_object_set_data(G_OBJECT(treeview), "parasite", parasite);
 
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
@@ -161,8 +162,8 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
 
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
-    column = gtk_tree_view_column_new_with_attributes("Detail", renderer,
-                                                      "text", WIDGET_DETAIL,
+    column = gtk_tree_view_column_new_with_attributes("Name", renderer,
+                                                      "text", WIDGET_NAME,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -241,17 +242,23 @@ append_widget(GtkTreeStore *model,
 {
     GtkTreeIter iter;
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
-    const char *detail = "";
+    const char *name;
     char *window_info;
     char *address;
     GList *l;
 
-    if (GTK_IS_LABEL(widget))
-        detail = gtk_label_get_text(GTK_LABEL(widget));
-    else if (GTK_IS_BUTTON(widget))
-        detail = gtk_button_get_label(GTK_BUTTON(widget));
-    else if (GTK_IS_WINDOW(widget))
-        detail = gtk_window_get_title(GTK_WINDOW(widget));
+    name = gtk_widget_get_name(widget);
+    if (name == NULL || strcmp(name, class_name) == 0) {
+        if (GTK_IS_LABEL(widget)) {
+            name = gtk_label_get_text(GTK_LABEL(widget));
+        } else if (GTK_IS_BUTTON(widget)) {
+            name = gtk_button_get_label(GTK_BUTTON(widget));
+        } else if (GTK_IS_WINDOW(widget)) {
+            name = gtk_window_get_title(GTK_WINDOW(widget));
+        } else {
+            name = "";
+        }
+    }
 
     if (widget->window)
     {
@@ -269,7 +276,7 @@ append_widget(GtkTreeStore *model,
     gtk_tree_store_set(model, &iter,
                        WIDGET, widget,
                        WIDGET_TYPE, class_name,
-                       WIDGET_DETAIL, detail,
+                       WIDGET_NAME, name,
                        WIDGET_REALIZED, GTK_WIDGET_REALIZED(widget),
                        WIDGET_MAPPED, GTK_WIDGET_MAPPED(widget),
                        WIDGET_VISIBLE, GTK_WIDGET_VISIBLE(widget),
