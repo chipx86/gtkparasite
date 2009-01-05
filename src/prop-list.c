@@ -1,4 +1,5 @@
 #include "parasite.h"
+#include "prop-list.h"
 
 
 enum
@@ -9,57 +10,113 @@ enum
 };
 
 
-GtkWidget *
-gtkparasite_prop_list_new(ParasiteWindow *parasite)
+struct _ParasitePropListPrivate
 {
     GtkListStore *model;
-    GtkWidget *treeview;
+};
+
+#define PARASITE_PROPLIST_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_PROPLIST, ParasitePropListPrivate))
+
+static GtkTreeViewClass *parent_class;
+
+
+static void
+parasite_proplist_init(ParasitePropList *proplist,
+                       ParasitePropListClass *klass)
+{
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
-    double text_scale = 0.8;
 
-    model = gtk_list_store_new(NUM_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+    proplist->priv = PARASITE_PROPLIST_GET_PRIVATE(proplist);
 
-    treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
-    gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
-    gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview), NAME);
+    proplist->priv->model =
+        gtk_list_store_new(NUM_COLUMNS,
+                           G_TYPE_STRING,  // NAME
+                           G_TYPE_STRING); // VALUE
+    gtk_tree_view_set_model(GTK_TREE_VIEW(proplist),
+                            GTK_TREE_MODEL(proplist->priv->model));
 
     renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
+    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Property", renderer,
-                                                      "text", NAME,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+                                                     "text", NAME,
+                                                     NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(proplist), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
     gtk_tree_view_column_set_sort_order(column, GTK_SORT_ASCENDING);
     gtk_tree_view_column_set_sort_column_id(column, NAME);
 
     renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
+    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Value", renderer,
                                                       "text", VALUE,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(proplist), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
 
-    gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model),
-                                         NAME, GTK_SORT_ASCENDING);
-
-    return treeview;
+    gtk_tree_sortable_set_sort_column_id(
+        GTK_TREE_SORTABLE(proplist->priv->model),
+        NAME, GTK_SORT_ASCENDING);
 }
 
-void
-gtkparasite_prop_list_set_widget(GtkWidget *prop_list,
-                                 GtkWidget *widget)
+
+static void
+parasite_proplist_class_init(ParasitePropListClass *klass)
 {
-    GtkListStore *model =
-        GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(prop_list)));
+    GObjectClass *object_class = G_OBJECT_CLASS(klass);
+
+    parent_class = g_type_class_peek_parent(klass);
+
+    g_type_class_add_private(object_class, sizeof(ParasitePropListPrivate));
+}
+
+
+GType
+parasite_proplist_get_type()
+{
+    static GType type = 0;
+
+    if (type == 0)
+    {
+        static const GTypeInfo info =
+        {
+            sizeof(ParasitePropListClass),
+            NULL, // base_init
+            NULL, // base_finalize
+            (GClassInitFunc) parasite_proplist_class_init,
+            NULL,
+            NULL, // class_data
+            sizeof(ParasitePropList),
+            0, // n_preallocs
+            (GInstanceInitFunc) parasite_proplist_init,
+        };
+
+        type = g_type_register_static(GTK_TYPE_TREE_VIEW,
+                                      "ParasitePropList",
+                                      &info, 0);
+    }
+
+    return type;
+}
+
+
+GtkWidget *
+parasite_proplist_new()
+{
+    return GTK_WIDGET(g_object_new(PARASITE_TYPE_PROPLIST, NULL));
+}
+
+
+void
+parasite_proplist_set_widget(ParasitePropList* proplist,
+                             GtkWidget *widget)
+{
     GtkTreeIter iter;
     GParamSpec **props;
     guint num_properties;
     guint i;
 
-    gtk_list_store_clear(model);
+    gtk_list_store_clear(proplist->priv->model);
 
     props = g_object_class_list_properties(G_OBJECT_GET_CLASS(widget),
                                            &num_properties);
@@ -71,14 +128,16 @@ gtkparasite_prop_list_set_widget(GtkWidget *prop_list,
         char *value;
 
         if (!(prop->flags & G_PARAM_READABLE))
+        {
             continue;
+        }
 
         g_value_init(&gvalue, prop->value_type);
         g_object_get_property(G_OBJECT(widget), prop->name, &gvalue);
         value = g_strdup_value_contents(&gvalue);
 
-        gtk_list_store_append(model, &iter);
-        gtk_list_store_set(model, &iter,
+        gtk_list_store_append(proplist->priv->model, &iter);
+        gtk_list_store_set(proplist->priv->model, &iter,
                            NAME, prop->name,
                            VALUE, value,
                            -1);
@@ -88,4 +147,5 @@ gtkparasite_prop_list_set_widget(GtkWidget *prop_list,
     }
 }
 
-// vim: set et ts=4:
+
+// vim: set et sw=4 ts=4:

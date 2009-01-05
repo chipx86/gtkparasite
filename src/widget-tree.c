@@ -1,4 +1,5 @@
 #include "parasite.h"
+#include "prop-list.h"
 
 #include <string.h>
 #include <gdk/gdkx.h>
@@ -58,7 +59,7 @@ on_widget_selected(GtkTreeSelection *selection,
                            WIDGET, &widget,
                            -1);
 
-        gtkparasite_prop_list_set_widget(parasite->prop_list, widget);
+        parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list), widget);
 
         /* Flash the widget. */
         gtkparasite_flash_widget(parasite, widget);

@@ -1,4 +1,5 @@
 #include "parasite.h"
+#include "prop-list.h"
 
 
 static GtkWidget *
@@ -31,7 +32,7 @@ create_prop_list_pane(ParasiteWindow *parasite)
                                         GTK_SHADOW_IN);
     gtk_widget_set_size_request(swin, 250, -1);
 
-    parasite->prop_list = gtkparasite_prop_list_new(parasite);
+    parasite->prop_list = parasite_proplist_new();
     gtk_widget_show(parasite->prop_list);
     gtk_container_add(GTK_CONTAINER(swin), parasite->prop_list);
 
