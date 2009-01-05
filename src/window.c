@@ -56,9 +56,8 @@ on_show_graphic_updates_toggled(GtkWidget *toggle_button,
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button)));
 }
 
-static void
-create_top_pane(ParasiteWindow *parasite,
-                GtkWidget *paned)
+static GtkWidget *
+create_widget_tree(ParasiteWindow *parasite)
 {
     GtkWidget *vbox;
     GtkWidget *bbox;
@@ -68,7 +67,6 @@ create_top_pane(ParasiteWindow *parasite,
 
     vbox = gtk_vbox_new(FALSE, 6);
     gtk_widget_show(vbox);
-    gtk_paned_pack1(GTK_PANED(paned), vbox, TRUE, TRUE);
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
     bbox = gtk_hbutton_box_new();
@@ -106,15 +104,41 @@ create_top_pane(ParasiteWindow *parasite,
     swin = create_prop_list_pane(parasite);
     gtk_widget_show(swin);
     gtk_paned_pack2(GTK_PANED(hpaned), swin, FALSE, TRUE);
+
+    return vbox;
 }
 
+static GtkWidget *
+create_action_list(ParasiteWindow *parasite)
+{
+   GtkWidget *vbox;
+   GtkWidget *swin;
+
+   vbox = gtk_vbox_new(FALSE, 6);
+   gtk_widget_show(vbox);
+   gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
+
+   swin = gtk_scrolled_window_new(NULL, NULL);
+   gtk_widget_show(swin);
+   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
+                                  GTK_POLICY_AUTOMATIC,
+                                  GTK_POLICY_ALWAYS);
+   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
+                                       GTK_SHADOW_IN);
+   gtk_box_pack_start(GTK_BOX(vbox), swin, TRUE, TRUE, 0);
+
+   parasite->action_list = gtkparasite_action_list_new(parasite);
+   gtk_widget_show(parasite->action_list);
+   gtk_container_add(GTK_CONTAINER(swin), parasite->action_list);
+
+   return vbox;
+}
 
 void
 gtkparasite_window_create()
 {
     ParasiteWindow *window;
-    GtkWidget *main_vbox;
-    GtkWidget *vpaned;
+    GtkWidget *notebook;
     char *title;
 
     window = g_new0(ParasiteWindow, 1);
@@ -130,15 +154,16 @@ gtkparasite_window_create()
     gtk_window_set_title(GTK_WINDOW(window->window), title);
     g_free(title);
 
-    main_vbox = gtk_vbox_new(FALSE, 0);
-    gtk_widget_show(main_vbox);
-    gtk_container_add(GTK_CONTAINER(window->window), main_vbox);
+    notebook = gtk_notebook_new();
+    gtk_widget_show(notebook);
+    gtk_container_add(GTK_CONTAINER(window->window), notebook);
 
-    vpaned = gtk_vpaned_new();
-    gtk_widget_show(vpaned);
-    gtk_box_pack_start(GTK_BOX(main_vbox), vpaned, TRUE, TRUE, 0);
-
-    create_top_pane(window, vpaned);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+                             create_widget_tree(window),
+                             gtk_label_new("Widget Tree"));
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+                             create_action_list(window),
+                             gtk_label_new("Action List"));
 }
 
 // vim: set et ts=4:

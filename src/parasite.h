@@ -10,6 +10,7 @@ typedef struct
     GtkWidget *window;
     GtkWidget *widget_tree;
     GtkWidget *prop_list;
+    GtkWidget *action_list;
 
     GtkWidget *grab_window;
     GtkWidget *highlight_window;
@@ -29,6 +30,7 @@ void gtkparasite_window_create();
 void gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget);
 
 GtkWidget *gtkparasite_inspect_button_new(ParasiteWindow *parasite);
+GtkWidget *gtkparasite_action_list_new(ParasiteWindow *parasite);
 
 GtkWidget *gtkparasite_widget_tree_new(ParasiteWindow *parasite);
 void gtkparasite_widget_tree_scan(GtkWidget *widget_tree, GtkWidget *window);

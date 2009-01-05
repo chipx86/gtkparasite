@@ -2,6 +2,7 @@ moduledir = $(libdir)/gtk-2.0/modules
 
 
 libgtkparasite_la_SOURCES = \
+	action-list.c \
 	inspect-button.c \
 	module.c \
 	parasite.h \
