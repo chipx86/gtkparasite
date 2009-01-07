@@ -1,4 +1,5 @@
 #include "parasite.h"
+#include "widget-tree.h"
 
 
 static void
@@ -22,13 +23,14 @@ on_inspect_widget(GtkWidget *grab_window,
 
         if (toplevel)
         {
-            gtkparasite_widget_tree_scan(parasite->widget_tree, toplevel);
+            parasite_widget_tree_scan(PARASITE_WIDGET_TREE(parasite->widget_tree),
+                                      toplevel);
         }
 
         if (widget)
         {
-            gtkparasite_widget_tree_select_widget(parasite->widget_tree,
-                                                  widget);
+            parasite_widget_tree_select_widget(PARASITE_WIDGET_TREE(parasite->widget_tree),
+                                               widget);
         }
     }
 }
