@@ -1,7 +1,8 @@
 AC_INIT(gtkparasite, 0.1.0, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
-AC_COPYRIGHT([Copyright 2008 Christian Hammond])
+AC_CONFIG_MACRO_DIR([m4])
+AC_COPYRIGHT([Copyright 2008-2009 Christian Hammond])
 
 dnl ################################################################
 dnl # libtool versioning
@@ -51,10 +52,42 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_EXEEXT
 
-
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
+
+AM_PATH_PYTHON([2.4], [
+    AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
+    if test x"$PYTHON_CONFIG" == x""; then
+        AC_PATH_PROG(PYTHON_CONFIG, python-config)
+    fi
+    if test x"$PYTHON_CONFIG" != x""; then
+        PYTHON_CFLAGS=`$PYTHON_CONFIG --includes`
+        PYTHON_LIBS=`$PYTHON_CONFIG --libs`
+    else
+        PYTHON_CFLAGS=`$PYTHON $srcdir/python-config.py --includes`
+        PYTHON_LIBS=`$PYTHON $srcdir/python-config.py --libs`
+    fi
+
+    # Kind of a hacky way to get this, but that's alright..
+    PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so"
+    AC_SUBST(PYTHON_SHARED_LIB)
+
+    PKG_CHECK_MODULES(PYGTK,
+                      [pygtk-2.0 >= 2.10.3],
+                      [
+                        has_pygtk=yes
+                        AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
+                      ],
+                      [has_pygtk=no])
+], [has_python=no])
+
+AM_CONDITIONAL(ENABLE_PYTHON, [test x"$has_pygtk" = x"yes"])
+
+AC_SUBST(PYTHON_CFLAGS)
+AC_SUBST(PYTHON_LIBS)
+AC_SUBST(PYGTK_CFLAGS)
+AC_SUBST(PYGTK_LIBS)
 
 
 dnl # Use wall if we have GCC

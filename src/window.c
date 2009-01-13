@@ -1,6 +1,9 @@
 #include "parasite.h"
 #include "prop-list.h"
 #include "widget-tree.h"
+#include "python-shell.h"
+
+#include "config.h"
 
 
 static void
@@ -13,7 +16,6 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
     /* Flash the widget. */
     gtkparasite_flash_widget(parasite, selected);
 }
-
 
 static GtkWidget *
 create_widget_list_pane(ParasiteWindow *parasite)
@@ -90,7 +92,6 @@ create_top_pane(ParasiteWindow *parasite,
     vbox = gtk_vbox_new(FALSE, 6);
     gtk_widget_show(vbox);
     gtk_paned_pack1(GTK_PANED(paned), vbox, TRUE, TRUE);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
     bbox = gtk_hbutton_box_new();
     gtk_widget_show(bbox);
@@ -129,13 +130,15 @@ create_top_pane(ParasiteWindow *parasite,
     gtk_paned_pack2(GTK_PANED(hpaned), swin, FALSE, TRUE);
 }
 
-
 void
 gtkparasite_window_create()
 {
     ParasiteWindow *window;
     GtkWidget *main_vbox;
     GtkWidget *vpaned;
+#ifdef ENABLE_PYTHON
+    GtkWidget *python_shell;
+#endif
     char *title;
 
     window = g_new0(ParasiteWindow, 1);
@@ -145,6 +148,7 @@ gtkparasite_window_create()
      */
     window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window->window), 1000, 500);
+    gtk_container_set_border_width(GTK_CONTAINER(window->window), 12);
     gtk_widget_show(window->window);
 
     title = g_strdup_printf("Parasite - %s", g_get_application_name());
@@ -160,6 +164,12 @@ gtkparasite_window_create()
     gtk_box_pack_start(GTK_BOX(main_vbox), vpaned, TRUE, TRUE, 0);
 
     create_top_pane(window, vpaned);
+
+#ifdef ENABLE_PYTHON
+    python_shell = gtkparasite_python_shell_new();
+    gtk_widget_show(python_shell);
+    gtk_paned_pack2(GTK_PANED(vpaned), python_shell, FALSE, FALSE);
+#endif
 }
 
 // vim: set et sw=4 ts=4:
