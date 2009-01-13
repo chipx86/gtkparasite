@@ -1,10 +1,6 @@
 #include <gdk/gdkkeysyms.h>
 
-#include <dlfcn.h>
-#include <Python.h>
-#include <pygobject.h>
-#include <pygtk/pygtk.h>
-
+#include "python-hooks.h"
 #include "python-shell.h"
 
 #define GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(obj) \
@@ -33,10 +29,6 @@ enum
 static void gtkparasite_python_shell_finalize(GObject *obj);
 
 /* Python integration */
-static void gtkparasite_python_shell_handle_stdout(GtkWidget *python_shell,
-                                                   const char *str);
-static void gtkparasite_python_shell_handle_stderr(GtkWidget *python_shell,
-                                                   const char *str);
 static char *gtkparasite_python_shell_get_input(GtkWidget *python_shell);
 
 /* Callbacks */
@@ -47,67 +39,8 @@ static gboolean gtkparasite_python_shell_key_press_cb(GtkWidget *textview,
 
 static GtkVBoxClass *parent_class = NULL;
 //static guint signals[LAST_SIGNAL] = {0};
-static GtkWidget *cur_python_shell = NULL;
 
 G_DEFINE_TYPE(GtkParasitePythonShell, gtkparasite_python_shell, GTK_TYPE_VBOX);
-
-
-static PyObject *
-capture_stdout(PyObject *self, PyObject *args)
-{
-    char *str = NULL;
-
-    if (!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
-
-    if (cur_python_shell != NULL)
-        gtkparasite_python_shell_handle_stdout(cur_python_shell, str);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-capture_stderr(PyObject *self, PyObject *args)
-{
-    char *str = NULL;
-
-    if (!PyArg_ParseTuple(args, "s", &str))
-        return NULL;
-
-    if (cur_python_shell != NULL)
-        gtkparasite_python_shell_handle_stderr(cur_python_shell, str);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-wrap_gobj(PyObject *self, PyObject *args)
-{
-    void *addr;
-    GObject *obj;
-
-    if (!PyArg_ParseTuple(args, "l", &addr))
-        return NULL;
-
-    if (!G_IS_OBJECT(addr))
-        return NULL; // XXX
-
-    obj = G_OBJECT(addr);
-
-    if (!obj)
-        return NULL; // XXX
-
-    return pygobject_new(obj);
-}
-
-static PyMethodDef gtkparasite_python_methods[] = {
-    {"capture_stdout", capture_stdout, METH_VARARGS, "Captures stdout"},
-    {"capture_stderr", capture_stderr, METH_VARARGS, "Captures stderr"},
-    {"gobj", wrap_gobj, METH_VARARGS, "Wraps a C GObject"},
-    {NULL, NULL, 0, NULL}
-};
 
 
 static void
@@ -123,43 +56,6 @@ gtkparasite_python_shell_class_init(GtkParasitePythonShellClass *klass)
 }
 
 static void
-gtkparasite_python_shell_init_python(void)
-{
-    PyObject *module;
-
-    /* This prevents errors such as "undefined symbol: PyExc_ImportError" */
-    if (!dlopen(PYTHON_SHARED_LIB, RTLD_NOW | RTLD_GLOBAL))
-    {
-        g_error("%s\n", dlerror());
-        return;
-    }
-
-    Py_Initialize();
-
-    Py_InitModule("parasite", gtkparasite_python_methods);
-    PyRun_SimpleString(
-        "import parasite\n"
-        "import sys\n"
-        "\n"
-        "class StdoutCatcher:\n"
-        "    def write(self, str):\n"
-        "        parasite.capture_stdout(str)\n"
-        "\n"
-        "class StderrCatcher:\n"
-        "    def write(self, str):\n"
-        "        parasite.capture_stderr(str)\n"
-        "\n"
-        "sys.stdout = StdoutCatcher()\n"
-        "sys.stderr = StderrCatcher()\n"
-    );
-
-    init_pygobject();
-    init_pygtk();
-
-    module = PyImport_ImportModule("gobject");
-}
-
-static void
 gtkparasite_python_shell_init(GtkParasitePythonShell *python_shell)
 {
     GtkParasitePythonShellPrivate *priv =
@@ -168,8 +64,6 @@ gtkparasite_python_shell_init(GtkParasitePythonShell *python_shell)
     GtkTextBuffer *buffer;
     GtkTextIter iter;
     PangoFontDescription *font_desc;
-
-    gtkparasite_python_shell_init_python();
 
     gtk_box_set_spacing(GTK_BOX(python_shell), 6);
 
@@ -211,7 +105,6 @@ gtkparasite_python_shell_init(GtkParasitePythonShell *python_shell)
 static void
 gtkparasite_python_shell_finalize(GObject *obj)
 {
-    Py_Finalize();
 }
 
 static void
@@ -234,35 +127,26 @@ gtkparasite_python_shell_append_text(GtkWidget *python_shell,
 }
 
 static void
-gtkparasite_python_shell_handle_stdout(GtkWidget *python_shell,
-                                       const char *str)
-{
-    gtkparasite_python_shell_append_text(python_shell, str);
-}
-
-static void
-gtkparasite_python_shell_handle_stderr(GtkWidget *python_shell,
-                                       const char *str)
-{
-    gtkparasite_python_shell_append_text(python_shell, str);
-}
-
-static void
 gtkparasite_python_shell_process_line(GtkWidget *python_shell)
 {
     GtkParasitePythonShellPrivate *priv =
         GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
 
     char *command = gtkparasite_python_shell_get_input(python_shell);
+    char *out;
+    char *err;
 
     gtkparasite_python_shell_append_text(python_shell, "\n");
-
-    priv->history_pos = 0;
-    cur_python_shell = python_shell;
-    PyRun_SimpleString(command);
-    cur_python_shell = NULL;
+    gtkparasite_python_run(command, &out, &err);
 
     g_free(command);
+
+    priv->history_pos = 0;
+
+    gtkparasite_python_shell_append_text(python_shell, out);
+
+    g_free(out);
+    g_free(err);
 }
 
 static char *

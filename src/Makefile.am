@@ -10,6 +10,8 @@ SOURCES = \
 
 if ENABLE_PYTHON
 SOURCES += \
+	python-hooks.c \
+	python-hooks.h \
 	python-shell.c \
 	python-shell.h
 endif
