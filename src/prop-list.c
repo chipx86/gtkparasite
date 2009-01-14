@@ -1,11 +1,13 @@
 #include "parasite.h"
 #include "prop-list.h"
+#include "property-cell-renderer.h"
 
 
 enum
 {
-    NAME,
-    VALUE,
+    COLUMN_NAME,
+    COLUMN_VALUE,
+    COLUMN_OBJECT,
     NUM_COLUMNS
 };
 
@@ -31,32 +33,37 @@ parasite_proplist_init(ParasitePropList *proplist,
 
     proplist->priv->model =
         gtk_list_store_new(NUM_COLUMNS,
-                           G_TYPE_STRING,  // NAME
-                           G_TYPE_STRING); // VALUE
+                           G_TYPE_STRING,  // COLUMN_NAME
+                           G_TYPE_STRING,  // COLUMN_VALUE
+                           G_TYPE_OBJECT); // COLUMN_OBJECT
     gtk_tree_view_set_model(GTK_TREE_VIEW(proplist),
                             GTK_TREE_MODEL(proplist->priv->model));
 
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Property", renderer,
-                                                     "text", NAME,
+                                                     "text", COLUMN_NAME,
                                                      NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(proplist), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
     gtk_tree_view_column_set_sort_order(column, GTK_SORT_ASCENDING);
-    gtk_tree_view_column_set_sort_column_id(column, NAME);
+    gtk_tree_view_column_set_sort_column_id(column, COLUMN_NAME);
 
-    renderer = gtk_cell_renderer_text_new();
+    renderer = parasite_property_cell_renderer_new();
     g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
-    column = gtk_tree_view_column_new_with_attributes("Value", renderer,
-                                                      "text", VALUE,
-                                                      NULL);
+    g_object_set(G_OBJECT(renderer), "editable", TRUE, NULL);
+    column = gtk_tree_view_column_new_with_attributes(
+        "Value", renderer,
+        "text", COLUMN_VALUE,
+        "object", COLUMN_OBJECT,
+        "name", COLUMN_NAME,
+        NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(proplist), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
 
     gtk_tree_sortable_set_sort_column_id(
         GTK_TREE_SORTABLE(proplist->priv->model),
-        NAME, GTK_SORT_ASCENDING);
+        COLUMN_NAME, GTK_SORT_ASCENDING);
 }
 
 
@@ -134,12 +141,25 @@ parasite_proplist_set_widget(ParasitePropList* proplist,
 
         g_value_init(&gvalue, prop->value_type);
         g_object_get_property(G_OBJECT(widget), prop->name, &gvalue);
-        value = g_strdup_value_contents(&gvalue);
+
+        if (G_VALUE_HOLDS_ENUM(&gvalue))
+        {
+            GEnumClass *enum_class = G_PARAM_SPEC_ENUM(prop)->enum_class;
+            GEnumValue *enum_value = g_enum_get_value(enum_class,
+                g_value_get_enum(&gvalue));
+
+            value = g_strdup(enum_value->value_name);
+        }
+        else
+        {
+            value = g_strdup_value_contents(&gvalue);
+        }
 
         gtk_list_store_append(proplist->priv->model, &iter);
         gtk_list_store_set(proplist->priv->model, &iter,
-                           NAME, prop->name,
-                           VALUE, value,
+                           COLUMN_NAME, prop->name,
+                           COLUMN_VALUE, value,
+                           COLUMN_OBJECT, widget,
                            -1);
 
         g_free(value);

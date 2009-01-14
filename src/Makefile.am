@@ -5,6 +5,8 @@ SOURCES = \
 	module.c \
 	parasite.h \
 	prop-list.c \
+	property-cell-renderer.c \
+	property-cell-renderer.h \
 	widget-tree.c \
 	window.c
 
