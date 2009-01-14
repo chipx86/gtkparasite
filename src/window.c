@@ -12,11 +12,13 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
                                  ParasiteWindow *parasite)
 {
     GtkWidget *selected = parasite_widget_tree_get_selected_widget(widget_tree);
-    parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list),
-                                 selected);
+    if (selected != NULL) {
+        parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list),
+                                     selected);
 
-    /* Flash the widget. */
-    gtkparasite_flash_widget(parasite, selected);
+        /* Flash the widget. */
+        gtkparasite_flash_widget(parasite, selected);
+    }
 }
 
 
@@ -65,6 +67,7 @@ on_send_widget_to_shell_activate(GtkWidget *menuitem,
             str, NULL);
 
         g_free(str);
+        parasite_python_shell_focus(PARASITE_PYTHON_SHELL(parasite->python_shell));
     }
 }
 
@@ -83,6 +86,8 @@ on_send_action_to_shell_activate(GtkWidget *menuitem,
             str, NULL);
 
         g_free(str);
+
+        parasite_python_shell_focus(PARASITE_PYTHON_SHELL(parasite->python_shell));
     }
 }
 #endif // ENABLE_PYTHON

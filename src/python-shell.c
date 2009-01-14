@@ -410,4 +410,10 @@ parasite_python_shell_append_text(ParasitePythonShell *python_shell,
                                  0, TRUE, 0, 1);
 }
 
+void
+parasite_python_shell_focus(ParasitePythonShell *python_shell)
+{
+   gtk_widget_grab_focus(PARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell)->textview);
+}
+
 // vim: set et ts=4:

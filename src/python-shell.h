@@ -47,6 +47,7 @@ GtkWidget *parasite_python_shell_new(void);
 void parasite_python_shell_append_text(ParasitePythonShell *python_shell,
                                        const char *str,
                                        const char *tag);
+void parasite_python_shell_focus(ParasitePythonShell *python_shell);
 
 G_END_DECLS
 
