@@ -127,26 +127,34 @@ gtkparasite_python_shell_append_text(GtkWidget *python_shell,
 }
 
 static void
+gtkparasite_python_shell_log_stdout(const char *text, gpointer python_shell)
+{
+    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text);
+}
+
+static void
+gtkparasite_python_shell_log_stderr(const char *text, gpointer python_shell)
+{
+    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text);
+}
+
+static void
 gtkparasite_python_shell_process_line(GtkWidget *python_shell)
 {
     GtkParasitePythonShellPrivate *priv =
         GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
 
     char *command = gtkparasite_python_shell_get_input(python_shell);
-    char *out;
-    char *err;
 
     gtkparasite_python_shell_append_text(python_shell, "\n");
-    gtkparasite_python_run(command, &out, &err);
+    gtkparasite_python_run(command,
+                           gtkparasite_python_shell_log_stdout,
+                           gtkparasite_python_shell_log_stderr,
+                           python_shell);
 
     g_free(command);
 
     priv->history_pos = 0;
-
-    gtkparasite_python_shell_append_text(python_shell, out);
-
-    g_free(out);
-    g_free(err);
 }
 
 static char *

@@ -3,7 +3,7 @@
 #include <pygobject.h>
 #include <pygtk/pygtk.h>
 
-#include "config.h"
+#include "python-hooks.h"
 
 
 static GString *captured_stdout = NULL;
@@ -104,7 +104,10 @@ gtkparasite_python_init(void)
 }
 
 void
-gtkparasite_python_run(const char *command, char **out, char **err)
+gtkparasite_python_run(const char *command,
+                       GtkParasitePythonLogger stdout_logger,
+                       GtkParasitePythonLogger stderr_logger,
+                       gpointer user_data)
 {
     PyRun_SimpleString("old_stdout = sys.stdout\n"
                        "old_stderr = sys.stderr\n"
@@ -116,11 +119,11 @@ gtkparasite_python_run(const char *command, char **out, char **err)
     PyRun_SimpleString("sys.stdout = old_stdout\n"
                        "sys.stderr = old_stderr\n");
 
-    if (out)
-        *out = g_strdup(captured_stdout->str);
+    if (stdout_logger != NULL)
+        stdout_logger(captured_stdout->str, user_data);
 
-    if (err)
-        *err = g_strdup(captured_stderr->str);
+    if (stderr_logger != NULL)
+        stderr_logger(captured_stderr->str, user_data);
 
     g_string_erase(captured_stdout, 0, -1);
     g_string_erase(captured_stderr, 0, -1);
