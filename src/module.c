@@ -13,8 +13,9 @@ gtk_module_init(gint argc, char *argv[])
 #endif
 
     gtkparasite_window_create();
+    return FALSE;
 
     return 0;
 }
 
-// vim: set et ts=4:
+// vim: set et sw=4 ts=4:

@@ -109,12 +109,19 @@ parasite_python_run(const char *command,
                     ParasitePythonLogger stderr_logger,
                     gpointer user_data)
 {
+    PyObject *module;
+    PyObject *dict;
+    PyObject *obj;
+
+    module = PyImport_AddModule("__main__");
+    dict = PyModule_GetDict(module);
+
     PyRun_SimpleString("old_stdout = sys.stdout\n"
                        "old_stderr = sys.stderr\n"
                        "sys.stdout = StdoutCatcher()\n"
                        "sys.stderr = StderrCatcher()\n");
 
-    PyRun_SimpleString(command);
+    obj = PyRun_String(command, Py_single_input, dict, dict);
 
     PyRun_SimpleString("sys.stdout = old_stdout\n"
                        "sys.stderr = old_stderr\n");
@@ -125,8 +132,22 @@ parasite_python_run(const char *command,
     if (stderr_logger != NULL)
         stderr_logger(captured_stderr->str, user_data);
 
+    // Print any returned object
+    if (obj != NULL && obj != Py_None) {
+       PyObject *repr = PyObject_Repr(obj);
+       if (repr != NULL) {
+           char *string = PyString_AsString(repr);
+
+           stdout_logger(string, user_data);
+           stdout_logger("\n", user_data);
+        }
+
+        Py_XDECREF(repr);
+    }
+    Py_XDECREF(obj);
+
     g_string_erase(captured_stdout, 0, -1);
     g_string_erase(captured_stderr, 0, -1);
 }
 
-// vim: set et ts=4:
+// vim: set et sw=4 ts=4:
