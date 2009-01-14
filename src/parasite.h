@@ -21,6 +21,7 @@ typedef struct
     GtkWidget *highlight_window;
 
     GtkWidget *widget_popup;
+    GtkWidget *action_popup;
 
     GdkWindow *selected_window;
 

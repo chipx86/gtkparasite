@@ -1,3 +1,4 @@
+#include "action-list.h"
 #include "parasite.h"
 #include "prop-list.h"
 #include "widget-tree.h"
@@ -18,6 +19,7 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
     gtkparasite_flash_widget(parasite, selected);
 }
 
+
 #ifdef ENABLE_PYTHON
 static gboolean
 on_widget_tree_button_press(ParasiteWidgetTree *widget_tree,
@@ -33,21 +35,58 @@ on_widget_tree_button_press(ParasiteWidgetTree *widget_tree,
     return FALSE;
 }
 
+
+static gboolean
+on_action_list_button_press(ParasiteActionList *actionlist,
+                            GdkEventButton *event,
+                            ParasiteWindow *parasite)
+{
+    if (event->button == 3)
+    {
+        gtk_menu_popup(GTK_MENU(parasite->action_popup), NULL, NULL,
+                       NULL, NULL, event->button, event->time);
+    }
+
+    return FALSE;
+}
+
+
 static void
 on_send_widget_to_shell_activate(GtkWidget *menuitem,
                                  ParasiteWindow *parasite)
 {
     GtkWidget *widget = parasite_widget_tree_get_selected_widget(
         PARASITE_WIDGET_TREE(parasite->widget_tree));
-    char *str = g_strdup_printf("parasite.gobj(%p)", widget);
+    if (widget != NULL) {
+        char *str = g_strdup_printf("parasite.gobj(%p)", widget);
 
-    parasite_python_shell_append_text(
-        PARASITE_PYTHON_SHELL(parasite->python_shell),
-        str, NULL);
+        parasite_python_shell_append_text(
+            PARASITE_PYTHON_SHELL(parasite->python_shell),
+            str, NULL);
 
-    g_free(str);
+        g_free(str);
+    }
+}
+
+
+static void
+on_send_action_to_shell_activate(GtkWidget *menuitem,
+                                 ParasiteWindow *parasite)
+{
+    gpointer selection = parasite_actionlist_get_selected_object(
+        PARASITE_ACTIONLIST(parasite->action_list));
+    if (selection != NULL) {
+        char *str = g_strdup_printf("parasite.gobj(%p)", selection);
+
+        parasite_python_shell_append_text(
+            PARASITE_PYTHON_SHELL(parasite->python_shell),
+            str, NULL);
+
+        g_free(str);
+    }
 }
 #endif // ENABLE_PYTHON
+
 
 static GtkWidget *
 create_widget_list_pane(ParasiteWindow *parasite)
@@ -193,6 +232,13 @@ create_action_list(ParasiteWindow *parasite)
    gtk_widget_show(parasite->action_list);
    gtk_container_add(GTK_CONTAINER(swin), parasite->action_list);
 
+#ifdef ENABLE_PYTHON
+    g_signal_connect(G_OBJECT(parasite->action_list),
+                     "button-press-event",
+                     G_CALLBACK(on_action_list_button_press),
+                     parasite);
+#endif
+
    return vbox;
 }
 
@@ -255,6 +301,16 @@ gtkparasite_window_create()
 
     g_signal_connect(G_OBJECT(menuitem), "activate",
                      G_CALLBACK(on_send_widget_to_shell_activate), window);
+
+    window->action_popup = gtk_menu_new();
+    gtk_widget_show(window->action_popup);
+
+    menuitem = gtk_menu_item_new_with_label("Send Object to Shell");
+    gtk_widget_show(menuitem);
+    gtk_menu_shell_append(GTK_MENU_SHELL(window->action_popup), menuitem);
+
+    g_signal_connect(G_OBJECT(menuitem), "activate",
+                     G_CALLBACK(on_send_action_to_shell_activate), window);
 #endif // ENABLE_PYTHON
 }
 

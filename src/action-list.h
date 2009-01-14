@@ -32,6 +32,7 @@ G_BEGIN_DECLS
 
 GType parasite_actionlist_get_type();
 GtkWidget *parasite_actionlist_new();
+gpointer parasite_actionlist_get_selected_object(ParasiteActionList *actionlist);
 
 
 G_END_DECLS

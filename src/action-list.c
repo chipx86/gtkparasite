@@ -9,6 +9,7 @@ enum
    ACTION_ICON,
    ROW_COLOR,
    SORT_NAME,
+   ADDRESS,
    NUM_COLUMNS
 };
 
@@ -32,7 +33,8 @@ update(ParasiteActionList *actionlist)
 
     gtk_tree_store_clear(actionlist->priv->model);
 
-    for (i = actionlist->priv->uimanagers; i != NULL; i = g_slist_next(i)) {
+    for (i = actionlist->priv->uimanagers; i != NULL; i = g_slist_next(i))
+    {
         GtkUIManager *uimanager;
         GList *action_groups;
         GList *j;
@@ -47,11 +49,13 @@ update(ParasiteActionList *actionlist)
         gtk_tree_store_set(actionlist->priv->model, &i_iter,
                            ACTION_LABEL, name,
                            SORT_NAME, name,
+                           ADDRESS, uimanager,
                            -1);
         g_free(name);
 
         action_groups = gtk_ui_manager_get_action_groups(uimanager);
-        for (j = action_groups; j != NULL; j = g_list_next(j)) {
+        for (j = action_groups; j != NULL; j = g_list_next(j))
+        {
             GtkActionGroup *action_group;
             GtkTreeIter j_iter;
             GList *actions;
@@ -67,10 +71,12 @@ update(ParasiteActionList *actionlist)
                                SORT_NAME, name,
                                ROW_COLOR, gtk_action_group_get_sensitive(action_group)
                                               ? "black" : "grey",
+                               ADDRESS, action_group,
                                -1);
 
             actions = gtk_action_group_list_actions(action_group);
-            for (k = actions; k != NULL; k = g_list_next(k)) {
+            for (k = actions; k != NULL; k = g_list_next(k))
+            {
                 GtkTreeIter k_iter;
                 GtkAction *action;
                 gchar *action_label;
@@ -96,6 +102,7 @@ update(ParasiteActionList *actionlist)
                                    ROW_COLOR, gtk_action_is_sensitive(action)
                                                   ? "black" : "grey",
                                    SORT_NAME, sort_name,
+                                   ADDRESS, action,
                                    -1);
 
                 g_free(sort_name);
@@ -173,11 +180,12 @@ parasite_actionlist_init(ParasiteActionList *actionlist,
 
     actionlist->priv->model =
         gtk_tree_store_new(NUM_COLUMNS,
-                           G_TYPE_STRING,  // ACTION_LABEL
-                           G_TYPE_STRING,  // ACTION_NAME
-                           G_TYPE_STRING,  // ACTION_ICON
-                           G_TYPE_STRING,  // ROW_COLOR,
-                           G_TYPE_STRING); // SORT_NAME
+                           G_TYPE_STRING,   // ACTION_LABEL
+                           G_TYPE_STRING,   // ACTION_NAME
+                           G_TYPE_STRING,   // ACTION_ICON
+                           G_TYPE_STRING,   // ROW_COLOR,
+                           G_TYPE_STRING,   // SORT_NAME
+                           G_TYPE_POINTER); // ADDRESS
     gtk_tree_view_set_model(GTK_TREE_VIEW(actionlist),
                             GTK_TREE_MODEL(actionlist->priv->model));
 
@@ -265,6 +273,28 @@ GtkWidget *
 parasite_actionlist_new()
 {
     return GTK_WIDGET(g_object_new(PARASITE_TYPE_ACTIONLIST, NULL));
+}
+
+
+gpointer
+parasite_actionlist_get_selected_object(ParasiteActionList *actionlist)
+{
+    GtkTreeIter iter;
+    GtkTreeSelection *sel;
+    GtkTreeModel *model;
+
+    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(actionlist));
+
+    if (gtk_tree_selection_get_selected(sel, &model, &iter))
+    {
+        gpointer pointer;
+
+        gtk_tree_model_get(GTK_TREE_MODEL(model), &iter,
+                           ADDRESS, &pointer,
+                           -1);
+        return pointer;
+    }
+    return NULL;
 }
 
 
