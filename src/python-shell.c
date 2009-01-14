@@ -132,26 +132,6 @@ gtkparasite_python_shell_finalize(GObject *python_shell)
 }
 
 static void
-gtkparasite_python_shell_append_text(GtkWidget *python_shell,
-                                     const char *str,
-                                     const char *tag)
-{
-    GtkParasitePythonShellPrivate *priv =
-        GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
-
-    GtkTextIter end;
-    GtkTextBuffer *buffer =
-        gtk_text_view_get_buffer(GTK_TEXT_VIEW(priv->textview));
-    GtkTextMark *mark = gtk_text_buffer_get_insert(buffer);
-
-    gtk_text_buffer_get_end_iter(buffer, &end);
-    gtk_text_buffer_move_mark(buffer, mark, &end);
-    gtk_text_buffer_insert_with_tags_by_name(buffer, &end, str, -1, tag, NULL);
-    gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(priv->textview), mark,
-                                 0, TRUE, 0, 1);
-}
-
-static void
 gtkparasite_python_shell_log_stdout(const char *text, gpointer python_shell)
 {
     gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text,
@@ -366,6 +346,26 @@ GtkWidget *
 gtkparasite_python_shell_new(void)
 {
     return g_object_new(GTKPARASITE_TYPE_PYTHON_SHELL, NULL);
+}
+
+void
+gtkparasite_python_shell_append_text(GtkWidget *python_shell,
+                                     const char *str,
+                                     const char *tag)
+{
+    GtkParasitePythonShellPrivate *priv =
+        GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
+
+    GtkTextIter end;
+    GtkTextBuffer *buffer =
+        gtk_text_view_get_buffer(GTK_TEXT_VIEW(priv->textview));
+    GtkTextMark *mark = gtk_text_buffer_get_insert(buffer);
+
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    gtk_text_buffer_move_mark(buffer, mark, &end);
+    gtk_text_buffer_insert_with_tags_by_name(buffer, &end, str, -1, tag, NULL);
+    gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(priv->textview), mark,
+                                 0, TRUE, 0, 1);
 }
 
 // vim: set et ts=4:

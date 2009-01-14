@@ -44,6 +44,9 @@ G_BEGIN_DECLS
 GType gtkparasite_python_shell_get_type(void);
 
 GtkWidget *gtkparasite_python_shell_new(void);
+void gtkparasite_python_shell_append_text(GtkWidget *python_shell,
+										  const char *str,
+										  const char *tag);
 
 G_END_DECLS
 
