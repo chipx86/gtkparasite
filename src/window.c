@@ -19,7 +19,7 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
 }
 
 #ifdef ENABLE_PYTHON
-static void
+static gboolean
 on_widget_tree_button_press(ParasiteWidgetTree *widget_tree,
                             GdkEventButton *event,
                             ParasiteWindow *parasite)
@@ -29,6 +29,8 @@ on_widget_tree_button_press(ParasiteWidgetTree *widget_tree,
         gtk_menu_popup(GTK_MENU(parasite->widget_popup), NULL, NULL,
                        NULL, NULL, event->button, event->time);
     }
+
+    return FALSE;
 }
 
 static void

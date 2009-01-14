@@ -1,4 +1,5 @@
 #include <gdk/gdkkeysyms.h>
+#include <string.h>
 
 #include "python-hooks.h"
 #include "python-shell.h"
@@ -18,6 +19,9 @@ typedef struct
 
     GQueue *history;
     GList *cur_history_item;
+
+    GString *pending_command;
+    gboolean in_block;
 
 } ParasitePythonShellPrivate;
 
@@ -153,9 +157,10 @@ parasite_python_shell_write_prompt(GtkWidget *python_shell)
     GtkTextBuffer *buffer =
         gtk_text_view_get_buffer(GTK_TEXT_VIEW(priv->textview));
     GtkTextIter iter;
+    const char *prompt = (priv->pending_command == NULL ? ">>> " : "... ");
 
     parasite_python_shell_append_text(PARASITE_PYTHON_SHELL(python_shell),
-                                      ">>> ", "prompt");
+                                      prompt, "prompt");
 
     gtk_text_buffer_get_end_iter(buffer, &iter);
     gtk_text_buffer_move_mark(buffer, priv->line_start_mark, &iter);
@@ -168,27 +173,63 @@ parasite_python_shell_process_line(GtkWidget *python_shell)
         PARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
 
     char *command = parasite_python_shell_get_input(python_shell);
+    char last_char;
 
     parasite_python_shell_append_text(PARASITE_PYTHON_SHELL(python_shell),
                                       "\n", NULL);
 
-    if (*command == '\0')
+    if (*command != '\0')
     {
-        // The line is empty. Don't store it in the history or process it.
-        g_free(command);
-    }
-    else
-    {
+        /* Save this command in the history. */
         g_queue_push_head(priv->history, command);
         priv->cur_history_item = NULL;
 
         if (g_queue_get_length(priv->history) > MAX_HISTORY_LENGTH)
             g_free(g_queue_pop_tail(priv->history));
+    }
+
+    last_char = command[MAX(0, strlen(command) - 1)];
+
+    if (last_char == ':' || last_char == '\\' ||
+        (priv->in_block && g_ascii_isspace(command[0])))
+    {
+        printf("in block.. %c, %d, %d\n",
+               last_char, priv->in_block,
+               g_ascii_isspace(command[0]));
+        /* This is a multi-line expression */
+        if (priv->pending_command == NULL)
+            priv->pending_command = g_string_new(command);
+        else
+            g_string_append(priv->pending_command, command);
+
+        g_string_append_c(priv->pending_command, '\n');
+
+        if (last_char == ':')
+            priv->in_block = TRUE;
+    }
+    else
+    {
+        if (priv->pending_command != NULL)
+        {
+            g_string_append(priv->pending_command, command);
+            g_string_append_c(priv->pending_command, '\n');
+
+            /* We're not actually leaking this. It's in the history. */
+            command = g_string_free(priv->pending_command, FALSE);
+        }
 
         parasite_python_run(command,
                             parasite_python_shell_log_stdout,
                             parasite_python_shell_log_stderr,
                             python_shell);
+
+        if (priv->pending_command != NULL)
+        {
+            /* Now do the cleanup. */
+            g_free(command);
+            priv->pending_command = NULL;
+            priv->in_block = FALSE;
+        }
     }
 
     parasite_python_shell_write_prompt(python_shell);
