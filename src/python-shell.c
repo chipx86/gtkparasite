@@ -134,15 +134,15 @@ parasite_python_shell_finalize(GObject *python_shell)
 static void
 parasite_python_shell_log_stdout(const char *text, gpointer python_shell)
 {
-    parasite_python_shell_append_text(GTK_WIDGET(python_shell), text,
-                                      "stdout");
+    parasite_python_shell_append_text(PARASITE_PYTHON_SHELL(python_shell),
+                                      text, "stdout");
 }
 
 static void
 parasite_python_shell_log_stderr(const char *text, gpointer python_shell)
 {
-    parasite_python_shell_append_text(GTK_WIDGET(python_shell), text,
-                                      "stderr");
+    parasite_python_shell_append_text(PARASITE_PYTHON_SHELL(python_shell),
+                                      text, "stderr");
 }
 
 static void
@@ -154,8 +154,8 @@ parasite_python_shell_write_prompt(GtkWidget *python_shell)
         gtk_text_view_get_buffer(GTK_TEXT_VIEW(priv->textview));
     GtkTextIter iter;
 
-    parasite_python_shell_append_text(GTK_WIDGET(python_shell), ">>> ",
-                                      "prompt");
+    parasite_python_shell_append_text(PARASITE_PYTHON_SHELL(python_shell),
+                                      ">>> ", "prompt");
 
     gtk_text_buffer_get_end_iter(buffer, &iter);
     gtk_text_buffer_move_mark(buffer, priv->line_start_mark, &iter);
@@ -169,7 +169,8 @@ parasite_python_shell_process_line(GtkWidget *python_shell)
 
     char *command = parasite_python_shell_get_input(python_shell);
 
-    parasite_python_shell_append_text(python_shell, "\n", NULL);
+    parasite_python_shell_append_text(PARASITE_PYTHON_SHELL(python_shell),
+                                      "\n", NULL);
 
     if (*command == '\0')
     {
@@ -349,7 +350,7 @@ parasite_python_shell_new(void)
 }
 
 void
-parasite_python_shell_append_text(GtkWidget *python_shell,
+parasite_python_shell_append_text(ParasitePythonShell *python_shell,
                                   const char *str,
                                   const char *tag)
 {

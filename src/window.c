@@ -11,11 +11,41 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
                                  ParasiteWindow *parasite)
 {
     GtkWidget *selected = parasite_widget_tree_get_selected_widget(widget_tree);
-    parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list), selected);
+    parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list),
+                                 selected);
 
     /* Flash the widget. */
     gtkparasite_flash_widget(parasite, selected);
 }
+
+#ifdef ENABLE_PYTHON
+static void
+on_widget_tree_button_press(ParasiteWidgetTree *widget_tree,
+                            GdkEventButton *event,
+                            ParasiteWindow *parasite)
+{
+    if (event->button == 3)
+    {
+        gtk_menu_popup(GTK_MENU(parasite->widget_popup), NULL, NULL,
+                       NULL, NULL, event->button, event->time);
+    }
+}
+
+static void
+on_send_widget_to_shell_activate(GtkWidget *menuitem,
+                                 ParasiteWindow *parasite)
+{
+    GtkWidget *widget = parasite_widget_tree_get_selected_widget(
+        PARASITE_WIDGET_TREE(parasite->widget_tree));
+    char *str = g_strdup_printf("parasite.gobj(%p)", widget);
+
+    parasite_python_shell_append_text(
+        PARASITE_PYTHON_SHELL(parasite->python_shell),
+        str, NULL);
+
+    g_free(str);
+}
+#endif // ENABLE_PYTHON
 
 static GtkWidget *
 create_widget_list_pane(ParasiteWindow *parasite)
@@ -36,6 +66,13 @@ create_widget_list_pane(ParasiteWindow *parasite)
                      "widget-changed",
                      G_CALLBACK(on_widget_tree_selection_changed),
                      parasite);
+
+#ifdef ENABLE_PYTHON
+    g_signal_connect(G_OBJECT(parasite->widget_tree),
+                     "button-press-event",
+                     G_CALLBACK(on_widget_tree_button_press),
+                     parasite);
+#endif
 
     return swin;
 }
@@ -137,7 +174,7 @@ gtkparasite_window_create()
     GtkWidget *main_vbox;
     GtkWidget *vpaned;
 #ifdef ENABLE_PYTHON
-    GtkWidget *python_shell;
+    GtkWidget *menuitem;
 #endif
     char *title;
 
@@ -166,10 +203,25 @@ gtkparasite_window_create()
     create_top_pane(window, vpaned);
 
 #ifdef ENABLE_PYTHON
-    python_shell = parasite_python_shell_new();
-    gtk_widget_show(python_shell);
-    gtk_paned_pack2(GTK_PANED(vpaned), python_shell, FALSE, FALSE);
-#endif
+    window->python_shell = parasite_python_shell_new();
+    gtk_widget_show(window->python_shell);
+    gtk_paned_pack2(GTK_PANED(vpaned), window->python_shell, FALSE, FALSE);
+
+    /*
+     * XXX Eventually we'll want to put more in here besides the menu
+     *     item we define below. At that point, we'll need to make this
+     *     more generic.
+     */
+    window->widget_popup = gtk_menu_new();
+    gtk_widget_show(window->widget_popup);
+
+    menuitem = gtk_menu_item_new_with_label("Send Widget to Shell");
+    gtk_widget_show(menuitem);
+    gtk_menu_shell_append(GTK_MENU_SHELL(window->widget_popup), menuitem);
+
+    g_signal_connect(G_OBJECT(menuitem), "activate",
+                     G_CALLBACK(on_send_widget_to_shell_activate), window);
+#endif // ENABLE_PYTHON
 }
 
 // vim: set et sw=4 ts=4:
