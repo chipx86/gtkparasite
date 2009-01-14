@@ -37,7 +37,6 @@ void gtkparasite_window_create();
 void gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget);
 
 GtkWidget *gtkparasite_inspect_button_new(ParasiteWindow *parasite);
-GtkWidget *gtkparasite_action_list_new(ParasiteWindow *parasite);
 
 
 #endif // _GTKPARASITE_H_
