@@ -58,7 +58,7 @@ wrap_gobj(PyObject *self, PyObject *args)
     return pygobject_new(obj);
 }
 
-static PyMethodDef gtkparasite_python_methods[] = {
+static PyMethodDef parasite_python_methods[] = {
     {"capture_stdout", capture_stdout, METH_VARARGS, "Captures stdout"},
     {"capture_stderr", capture_stderr, METH_VARARGS, "Captures stderr"},
     {"gobj", wrap_gobj, METH_VARARGS, "Wraps a C GObject"},
@@ -66,7 +66,7 @@ static PyMethodDef gtkparasite_python_methods[] = {
 };
 
 void
-gtkparasite_python_init(void)
+parasite_python_init(void)
 {
     PyObject *module;
 
@@ -82,7 +82,7 @@ gtkparasite_python_init(void)
 
     Py_Initialize();
 
-    Py_InitModule("parasite", gtkparasite_python_methods);
+    Py_InitModule("parasite", parasite_python_methods);
     PyRun_SimpleString(
         "import parasite\n"
         "import sys\n"
@@ -104,10 +104,10 @@ gtkparasite_python_init(void)
 }
 
 void
-gtkparasite_python_run(const char *command,
-                       GtkParasitePythonLogger stdout_logger,
-                       GtkParasitePythonLogger stderr_logger,
-                       gpointer user_data)
+parasite_python_run(const char *command,
+                    ParasitePythonLogger stdout_logger,
+                    ParasitePythonLogger stderr_logger,
+                    gpointer user_data)
 {
     PyRun_SimpleString("old_stdout = sys.stdout\n"
                        "old_stderr = sys.stderr\n"

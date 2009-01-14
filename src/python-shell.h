@@ -1,25 +1,25 @@
-#ifndef _GTKPARASITE_PYTHON_SHELL_H_
-#define _GTKPARASITE_PYTHON_SHELL_H_
+#ifndef _PARASITE_PYTHON_SHELL_H_
+#define _PARASITE_PYTHON_SHELL_H_
 
-typedef struct _GtkParasitePythonShell      GtkParasitePythonShell;
-typedef struct _GtkParasitePythonShellClass GtkParasitePythonShellClass;
+typedef struct _ParasitePythonShell      ParasitePythonShell;
+typedef struct _ParasitePythonShellClass ParasitePythonShellClass;
 
 #include <gtk/gtk.h>
 
-#define GTKPARASITE_TYPE_PYTHON_SHELL (gtkparasite_python_shell_get_type())
-#define GTKPARASITE_PYTHON_SHELL(obj) \
-		(G_TYPE_CHECK_INSTANCE_CAST((obj), GTKPARASITE_TYPE_PYTHON_SHELL, GtkParasitepython_shell))
-#define GTKPARASITE_PYTHON_SHELL_CLASS(klass) \
-		(G_TYPE_CHECK_CLASS_CAST((klass), GTKPARASITE_TYPE_PYTHON_SHELL, GtkParasitepython_shellClass))
-#define GTKPARASITE_IS_PYTHON_SHELL(obj) \
-		(G_TYPE_CHECK_INSTANCE_TYPE((obj), GTKPARASITE_TYPE_PYTHON_SHELL))
-#define GTKPARASITE_IS_PYTHON_SHELL_CLASS(klass) \
-		(G_TYPE_CHECK_CLASS_TYPE((klass), GTKPARASITE_TYPE_PYTHON_SHELL))
-#define GTKPARASITE_PYTHON_SHELL_GET_CLASS(obj) \
-		(G_TYPE_INSTANCE_GET_CLASS ((obj), GTKPARASITE_TYPE_PYTHON_SHELL, GtkParasitepython_shellClass))
+#define PARASITE_TYPE_PYTHON_SHELL (parasite_python_shell_get_type())
+#define PARASITE_PYTHON_SHELL(obj) \
+		(G_TYPE_CHECK_INSTANCE_CAST((obj), PARASITE_TYPE_PYTHON_SHELL, ParasitePythonShell))
+#define PARASITE_PYTHON_SHELL_CLASS(klass) \
+		(G_TYPE_CHECK_CLASS_CAST((klass), PARASITE_TYPE_PYTHON_SHELL, ParasitePythonShellClass))
+#define PARASITE_IS_PYTHON_SHELL(obj) \
+		(G_TYPE_CHECK_INSTANCE_TYPE((obj), PARASITE_TYPE_PYTHON_SHELL))
+#define PARASITE_IS_PYTHON_SHELL_CLASS(klass) \
+		(G_TYPE_CHECK_CLASS_TYPE((klass), PARASITE_TYPE_PYTHON_SHELL))
+#define PARASITE_PYTHON_SHELL_GET_CLASS(obj) \
+		(G_TYPE_INSTANCE_GET_CLASS ((obj), PARASITE_TYPE_PYTHON_SHELL, ParasitePythonShellClass))
 
 
-struct _GtkParasitePythonShell
+struct _ParasitePythonShell
 {
 	GtkVBox parent_object;
 
@@ -29,7 +29,7 @@ struct _GtkParasitePythonShell
 	void (*gtk_reserved4)(void);
 };
 
-struct _GtkParasitePythonShellClass
+struct _ParasitePythonShellClass
 {
 	GtkVBoxClass parent_class;
 
@@ -41,13 +41,13 @@ struct _GtkParasitePythonShellClass
 
 G_BEGIN_DECLS
 
-GType gtkparasite_python_shell_get_type(void);
+GType parasite_python_shell_get_type(void);
 
-GtkWidget *gtkparasite_python_shell_new(void);
-void gtkparasite_python_shell_append_text(GtkWidget *python_shell,
-										  const char *str,
-										  const char *tag);
+GtkWidget *parasite_python_shell_new(void);
+void parasite_python_shell_append_text(GtkWidget *python_shell,
+                                       const char *str,
+                                       const char *tag);
 
 G_END_DECLS
 
-#endif // _GTKPARASITE_PYTHON_SHELL_H_
+#endif // _PARASITE_PYTHON_SHELL_H_

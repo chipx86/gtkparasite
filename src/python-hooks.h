@@ -4,12 +4,12 @@
 #include <glib.h>
 
 
-typedef void (*GtkParasitePythonLogger)(const char *text, gpointer user_data);
+typedef void (*ParasitePythonLogger)(const char *text, gpointer user_data);
 
-void gtkparasite_python_init(void);
-void gtkparasite_python_run(const char *command,
-							GtkParasitePythonLogger stdout_logger,
-							GtkParasitePythonLogger stderr_logger,
-							gpointer user_data);
+void parasite_python_init(void);
+void parasite_python_run(const char *command,
+                         ParasitePythonLogger stdout_logger,
+                         ParasitePythonLogger stderr_logger,
+                         gpointer user_data);
 
 #endif // _GTKPARASITE_PYTHON_MODULE_H_

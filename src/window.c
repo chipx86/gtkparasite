@@ -166,7 +166,7 @@ gtkparasite_window_create()
     create_top_pane(window, vpaned);
 
 #ifdef ENABLE_PYTHON
-    python_shell = gtkparasite_python_shell_new();
+    python_shell = parasite_python_shell_new();
     gtk_widget_show(python_shell);
     gtk_paned_pack2(GTK_PANED(vpaned), python_shell, FALSE, FALSE);
 #endif

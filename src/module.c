@@ -9,7 +9,7 @@ int
 gtk_module_init(gint argc, char *argv[])
 {
 #ifdef ENABLE_PYTHON
-    gtkparasite_python_init();
+    parasite_python_init();
 #endif
 
     gtkparasite_window_create();
