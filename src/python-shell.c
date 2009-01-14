@@ -29,6 +29,7 @@ enum
 static void gtkparasite_python_shell_finalize(GObject *obj);
 
 /* Python integration */
+static void gtkparasite_python_shell_write_prompt(GtkWidget *python_shell);
 static char *gtkparasite_python_shell_get_input(GtkWidget *python_shell);
 
 /* Callbacks */
@@ -106,6 +107,11 @@ gtkparasite_python_shell_init(GtkParasitePythonShell *python_shell)
     gtk_text_buffer_create_tag(buffer, "stderr",
                                "foreground", "red",
                                NULL);
+    gtk_text_buffer_create_tag(buffer, "prompt",
+                               "foreground", "blue",
+                               NULL);
+
+    gtkparasite_python_shell_write_prompt(GTK_WIDGET(python_shell));
 }
 
 static void
@@ -148,11 +154,25 @@ gtkparasite_python_shell_log_stderr(const char *text, gpointer python_shell)
 }
 
 static void
-gtkparasite_python_shell_process_line(GtkWidget *python_shell)
+gtkparasite_python_shell_write_prompt(GtkWidget *python_shell)
 {
     GtkParasitePythonShellPrivate *priv =
         GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
+    GtkTextBuffer *buffer =
+        gtk_text_view_get_buffer(GTK_TEXT_VIEW(priv->textview));
+    GtkTextIter iter;
 
+    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), ">>> ",
+                                         "prompt");
+
+    gtk_text_buffer_get_end_iter(buffer, &iter);
+    gtk_text_buffer_move_mark(buffer, priv->line_start_mark, &iter);
+    priv->history_pos = 0;
+}
+
+static void
+gtkparasite_python_shell_process_line(GtkWidget *python_shell)
+{
     char *command = gtkparasite_python_shell_get_input(python_shell);
 
     gtkparasite_python_shell_append_text(python_shell, "\n", NULL);
@@ -163,7 +183,7 @@ gtkparasite_python_shell_process_line(GtkWidget *python_shell)
 
     g_free(command);
 
-    priv->history_pos = 0;
+    gtkparasite_python_shell_write_prompt(python_shell);
 }
 
 static char *
@@ -236,6 +256,11 @@ gtkparasite_python_shell_key_press_cb(GtkWidget *textview,
         cmp_insert_select = gtk_text_iter_compare(&insert_iter,
                                                   &selection_iter);
 
+        if (cmp_start_insert == 0 && cmp_start_select == 0 &&
+            event->keyval == GDK_BackSpace)
+        {
+            return TRUE;
+        }
         if (cmp_start_insert <= 0 && cmp_start_select <= 0)
         {
             return FALSE;
