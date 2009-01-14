@@ -14,7 +14,10 @@ enum
 
 struct _ParasitePropListPrivate
 {
+    GtkWidget *widget;
     GtkListStore *model;
+    GHashTable *prop_iters;
+    GList *signal_cnxs;
 };
 
 #define PARASITE_PROPLIST_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_PROPLIST, ParasitePropListPrivate))
@@ -30,6 +33,9 @@ parasite_proplist_init(ParasitePropList *proplist,
     GtkTreeViewColumn *column;
 
     proplist->priv = PARASITE_PROPLIST_GET_PRIVATE(proplist);
+    proplist->priv->prop_iters =
+        g_hash_table_new_full(g_str_hash, g_str_equal,
+                              NULL, (GDestroyNotify)gtk_tree_iter_free);
 
     proplist->priv->model =
         gtk_list_store_new(NUM_COLUMNS,
@@ -77,6 +83,53 @@ parasite_proplist_class_init(ParasitePropListClass *klass)
     g_type_class_add_private(object_class, sizeof(ParasitePropListPrivate));
 }
 
+static void
+parasite_prop_list_update_prop(ParasitePropList *proplist,
+                               GtkTreeIter *iter,
+                               GParamSpec *prop)
+{
+    GValue gvalue = {0};
+    char *value;
+
+    g_value_init(&gvalue, prop->value_type);
+    g_object_get_property(G_OBJECT(proplist->priv->widget),
+                          prop->name, &gvalue);
+
+    if (G_VALUE_HOLDS_ENUM(&gvalue))
+    {
+        GEnumClass *enum_class = G_PARAM_SPEC_ENUM(prop)->enum_class;
+        GEnumValue *enum_value = g_enum_get_value(enum_class,
+            g_value_get_enum(&gvalue));
+
+        value = g_strdup(enum_value->value_name);
+    }
+    else
+    {
+        value = g_strdup_value_contents(&gvalue);
+    }
+
+    gtk_list_store_set(proplist->priv->model, iter,
+                       COLUMN_NAME, prop->name,
+                       COLUMN_VALUE, value,
+                       COLUMN_OBJECT, proplist->priv->widget,
+                       -1);
+
+    g_free(value);
+    g_value_unset(&gvalue);
+}
+
+static void
+parasite_proplist_prop_changed_cb(GObject *pspec,
+                                  GParamSpec *prop,
+                                  ParasitePropList *proplist)
+{
+    GtkTreeIter *iter = g_hash_table_lookup(proplist->priv->prop_iters,
+                                            prop->name);
+
+    if (iter != NULL)
+        parasite_prop_list_update_prop(proplist, iter, prop);
+}
+
 
 GType
 parasite_proplist_get_type()
@@ -113,7 +166,6 @@ parasite_proplist_new()
     return GTK_WIDGET(g_object_new(PARASITE_TYPE_PROPLIST, NULL));
 }
 
-
 void
 parasite_proplist_set_widget(ParasitePropList* proplist,
                              GtkWidget *widget)
@@ -122,7 +174,17 @@ parasite_proplist_set_widget(ParasitePropList* proplist,
     GParamSpec **props;
     guint num_properties;
     guint i;
+    GList *l;
 
+    proplist->priv->widget = widget;
+
+    for (l = proplist->priv->signal_cnxs; l != NULL; l = l->next)
+        g_signal_handler_disconnect(widget, GPOINTER_TO_UINT(l->data));
+
+    g_list_free(proplist->priv->signal_cnxs);
+    proplist->priv->signal_cnxs = NULL;
+
+    g_hash_table_remove_all(proplist->priv->prop_iters);
     gtk_list_store_clear(proplist->priv->model);
 
     props = g_object_class_list_properties(G_OBJECT_GET_CLASS(widget),
@@ -131,39 +193,27 @@ parasite_proplist_set_widget(ParasitePropList* proplist,
     for (i = 0; i < num_properties; i++)
     {
         GParamSpec *prop = props[i];
-        GValue gvalue = {0};
-        char *value;
+        char *signal_name;
 
         if (!(prop->flags & G_PARAM_READABLE))
-        {
             continue;
-        }
-
-        g_value_init(&gvalue, prop->value_type);
-        g_object_get_property(G_OBJECT(widget), prop->name, &gvalue);
-
-        if (G_VALUE_HOLDS_ENUM(&gvalue))
-        {
-            GEnumClass *enum_class = G_PARAM_SPEC_ENUM(prop)->enum_class;
-            GEnumValue *enum_value = g_enum_get_value(enum_class,
-                g_value_get_enum(&gvalue));
-
-            value = g_strdup(enum_value->value_name);
-        }
-        else
-        {
-            value = g_strdup_value_contents(&gvalue);
-        }
 
         gtk_list_store_append(proplist->priv->model, &iter);
-        gtk_list_store_set(proplist->priv->model, &iter,
-                           COLUMN_NAME, prop->name,
-                           COLUMN_VALUE, value,
-                           COLUMN_OBJECT, widget,
-                           -1);
+        parasite_prop_list_update_prop(proplist, &iter, prop);
 
-        g_free(value);
-        g_value_unset(&gvalue);
+        g_hash_table_insert(proplist->priv->prop_iters, prop->name,
+                            gtk_tree_iter_copy(&iter));
+
+        /* Listen for updates */
+        signal_name = g_strdup_printf("notify::%s", prop->name);
+
+        proplist->priv->signal_cnxs =
+            g_list_prepend(proplist->priv->signal_cnxs, GINT_TO_POINTER(
+                g_signal_connect(G_OBJECT(widget), signal_name,
+                                 G_CALLBACK(parasite_proplist_prop_changed_cb),
+                                 proplist)));
+
+        g_free(signal_name);
     }
 }
 
