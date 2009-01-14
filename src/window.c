@@ -1,4 +1,18 @@
 #include "parasite.h"
+#include "prop-list.h"
+#include "widget-tree.h"
+
+
+static void
+on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
+                                 ParasiteWindow *parasite)
+{
+    GtkWidget *selected = parasite_widget_tree_get_selected_widget(widget_tree);
+    parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list), selected);
+
+    /* Flash the widget. */
+    gtkparasite_flash_widget(parasite, selected);
+}
 
 
 static GtkWidget *
@@ -12,9 +26,14 @@ create_widget_list_pane(ParasiteWindow *parasite)
     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
                                         GTK_SHADOW_IN);
 
-    parasite->widget_tree = gtkparasite_widget_tree_new(parasite);
+    parasite->widget_tree = parasite_widget_tree_new();
     gtk_widget_show(parasite->widget_tree);
     gtk_container_add(GTK_CONTAINER(swin), parasite->widget_tree);
+
+    g_signal_connect(G_OBJECT(parasite->widget_tree),
+                     "widget-changed",
+                     G_CALLBACK(on_widget_tree_selection_changed),
+                     parasite);
 
     return swin;
 }
@@ -31,7 +50,7 @@ create_prop_list_pane(ParasiteWindow *parasite)
                                         GTK_SHADOW_IN);
     gtk_widget_set_size_request(swin, 250, -1);
 
-    parasite->prop_list = gtkparasite_prop_list_new(parasite);
+    parasite->prop_list = parasite_proplist_new();
     gtk_widget_show(parasite->prop_list);
     gtk_container_add(GTK_CONTAINER(swin), parasite->prop_list);
 
@@ -46,6 +65,8 @@ on_edit_mode_toggled(GtkWidget *toggle_button,
         gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button));
 
     parasite->edit_mode_enabled = active;
+    parasite_widget_tree_set_edit_mode(PARASITE_WIDGET_TREE(parasite->widget_tree),
+                                       active);
 }
 
 static void
@@ -166,4 +187,4 @@ gtkparasite_window_create()
                              gtk_label_new("Action List"));
 }
 
-// vim: set et ts=4:
+// vim: set et sw=4 ts=4:

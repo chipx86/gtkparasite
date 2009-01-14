@@ -5,6 +5,10 @@
 #include <gtk/gtk.h>
 
 
+#define TREE_TEXT_SCALE 0.8
+#define TREE_CHECKBOX_SIZE (gint)(0.8 * 13)
+
+
 typedef struct
 {
     GtkWidget *window;
@@ -32,16 +36,7 @@ void gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget);
 GtkWidget *gtkparasite_inspect_button_new(ParasiteWindow *parasite);
 GtkWidget *gtkparasite_action_list_new(ParasiteWindow *parasite);
 
-GtkWidget *gtkparasite_widget_tree_new(ParasiteWindow *parasite);
-void gtkparasite_widget_tree_scan(GtkWidget *widget_tree, GtkWidget *window);
-void gtkparasite_widget_tree_select_widget(GtkWidget *widget_tree,
-                                           GtkWidget *window);
-
-GtkWidget *gtkparasite_prop_list_new(ParasiteWindow *parasite);
-void gtkparasite_prop_list_set_widget(GtkWidget *prop_list,
-                                      GtkWidget *widget);
-
 
 #endif // _GTKPARASITE_H_
 
-// vim: set et ts=4:
+// vim: set et sw=4 ts=4:

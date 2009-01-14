@@ -1,9 +1,11 @@
 #include "parasite.h"
+#include "widget-tree.h"
 
 
 static void
-on_inspect_widget(GtkWidget *grab_window, GdkEventButton *event,
-                        ParasiteWindow *parasite)
+on_inspect_widget(GtkWidget *grab_window,
+                  GdkEventButton *event,
+                  ParasiteWindow *parasite)
 {
     gdk_pointer_ungrab(event->time);
     gtk_widget_hide(parasite->highlight_window);
@@ -21,13 +23,14 @@ on_inspect_widget(GtkWidget *grab_window, GdkEventButton *event,
 
         if (toplevel)
         {
-            gtkparasite_widget_tree_scan(parasite->widget_tree, toplevel);
+            parasite_widget_tree_scan(PARASITE_WIDGET_TREE(parasite->widget_tree),
+                                      toplevel);
         }
 
         if (widget)
         {
-            gtkparasite_widget_tree_select_widget(parasite->widget_tree,
-                                                  widget);
+            parasite_widget_tree_select_widget(PARASITE_WIDGET_TREE(parasite->widget_tree),
+                                               widget);
         }
     }
 }
@@ -73,8 +76,9 @@ ensure_highlight_window(ParasiteWindow *parasite)
 
 
 static void
-on_highlight_widget(GtkWidget *grab_window, GdkEventMotion *event,
-                          ParasiteWindow *parasite)
+on_highlight_widget(GtkWidget *grab_window,
+                    GdkEventMotion *event,
+                    ParasiteWindow *parasite)
 {
     GdkWindow *selected_window;
     gint x, y, width, height;
@@ -85,13 +89,22 @@ on_highlight_widget(GtkWidget *grab_window, GdkEventMotion *event,
 
     selected_window = gdk_display_get_window_at_pointer(
         gtk_widget_get_display(grab_window), NULL, NULL);
-    parasite->selected_window = selected_window;
 
     if (selected_window == NULL)
     {
         /* This window isn't in-process. Ignore it. */
+        parasite->selected_window = NULL;
         return;
     }
+
+    if (gdk_window_get_toplevel(selected_window) ==
+        gtk_widget_get_window(parasite->window)) {
+       /* Don't hilight things in the parasite window */
+        parasite->selected_window = NULL;
+        return;
+    }
+
+    parasite->selected_window = selected_window;
 
     gdk_window_get_origin(selected_window, &x, &y);
     gdk_drawable_get_size(GDK_DRAWABLE(selected_window), &width, &height);
@@ -206,4 +219,4 @@ gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget)
     }
 }
 
-// vim: set et ts=4:
+// vim: set et sw=4 ts=4:

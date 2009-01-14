@@ -1,4 +1,6 @@
 #include "parasite.h"
+#include "prop-list.h"
+#include "widget-tree.h"
 
 #include <string.h>
 #include <gdk/gdkx.h>
@@ -19,72 +21,52 @@ enum
 };
 
 
-#define GET_PARASITE(widget) g_object_get_data(G_OBJECT(widget), "parasite")
-
-
-#if 0
-static GtkWidget *
-get_widget_from_path(GtkWidget *treeview,
-                     GtkTreePath *path)
+enum
 {
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
-    GtkTreeIter iter;
-    GtkWidget *widget = NULL;
+    WIDGET_CHANGED,
+    LAST_SIGNAL
+};
 
-    gtk_tree_model_get_iter(model, &iter, path);
-    gtk_tree_model_get(model, &iter,
-                       WIDGET, &widget,
-                       -1);
 
-    return widget;
-}
-#endif
+struct _ParasiteWidgetTreePrivate
+{
+    GtkTreeStore *model;
+    gboolean edit_mode_enabled;
+};
+
+#define PARASITE_WIDGET_TREE_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_WIDGET_TREE, ParasiteWidgetTreePrivate))
+
+static GtkTreeViewClass *parent_class;
+static guint widget_tree_signals[LAST_SIGNAL] = { 0 };
+
 
 static void
-on_widget_selected(GtkTreeSelection *selection,
-                   ParasiteWindow *parasite)
+parasite_widget_tree_on_widget_selected(GtkTreeSelection *selection,
+                                        ParasiteWidgetTree *widget_tree)
 {
-    GtkTreeIter iter;
-    GtkTreeSelection *sel;
-    GtkTreeModel *model;
-
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(parasite->widget_tree));
-
-    if (gtk_tree_selection_get_selected(sel, &model, &iter))
-    {
-        GtkWidget *widget;
-
-        gtk_tree_model_get(GTK_TREE_MODEL(model), &iter,
-                           WIDGET, &widget,
-                           -1);
-
-        gtkparasite_prop_list_set_widget(parasite->prop_list, widget);
-
-        /* Flash the widget. */
-        gtkparasite_flash_widget(parasite, widget);
-    }
+    g_signal_emit(widget_tree, widget_tree_signals[WIDGET_CHANGED], 0);
 }
+
 
 static void
 handle_toggle(GtkCellRendererToggle *toggle,
               char *path_str,
-              GtkWidget *treeview,
+              ParasiteWidgetTree *widget_tree,
               int column,
               void (*enable_func)(GtkWidget*),
               void (*disable_func)(GtkWidget*))
 {
-    ParasiteWindow *parasite = GET_PARASITE(treeview);
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(treeview));
     GtkTreeIter iter;
     GtkWidget *widget;
     gboolean new_active = !gtk_cell_renderer_toggle_get_active(toggle);
 
-    if (!parasite->edit_mode_enabled)
+    if (!widget_tree->priv->edit_mode_enabled)
         return;
 
-    gtk_tree_model_get_iter(model, &iter,
+    gtk_tree_model_get_iter(GTK_TREE_MODEL(widget_tree->priv->model),
+                            &iter,
                             gtk_tree_path_new_from_string(path_str));
-    gtk_tree_model_get(model, &iter,
+    gtk_tree_model_get(GTK_TREE_MODEL(widget_tree->priv->model), &iter,
                        WIDGET, &widget,
                        -1);
 
@@ -93,127 +75,154 @@ handle_toggle(GtkCellRendererToggle *toggle,
     else
         disable_func(widget);
 
-    gtk_tree_store_set(GTK_TREE_STORE(model), &iter,
+    gtk_tree_store_set(widget_tree->priv->model, &iter,
                        column, new_active,
                        -1);
 }
+
 
 static void
 on_toggle_realize(GtkCellRendererToggle *toggle,
                   char *path_str,
                   GtkWidget *treeview)
 {
-    handle_toggle(toggle, path_str, treeview, WIDGET_REALIZED,
+    handle_toggle(toggle,
+                  path_str,
+                  PARASITE_WIDGET_TREE(treeview),
+                  WIDGET_REALIZED,
                   gtk_widget_realize,
                   gtk_widget_unrealize);
 }
+
 
 static void
 on_toggle_visible(GtkCellRendererToggle *toggle,
                   char *path_str,
                   GtkWidget *treeview)
 {
-    handle_toggle(toggle, path_str, treeview, WIDGET_VISIBLE,
+    handle_toggle(toggle,
+                  path_str,
+                  PARASITE_WIDGET_TREE(treeview),
+                  WIDGET_VISIBLE,
                   gtk_widget_show,
                   gtk_widget_hide);
 }
+
 
 static void
 on_toggle_map(GtkCellRendererToggle *toggle,
               char *path_str,
               GtkWidget *treeview)
 {
-    handle_toggle(toggle, path_str, treeview, WIDGET_MAPPED,
+    handle_toggle(toggle,
+                  path_str,
+                  PARASITE_WIDGET_TREE(treeview),
+                  WIDGET_MAPPED,
                   gtk_widget_map,
                   gtk_widget_unmap);
 }
 
-GtkWidget *
-gtkparasite_widget_tree_new(ParasiteWindow *parasite)
+
+static void
+parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
+                          ParasiteWidgetTreeClass *klass)
 {
-    GtkTreeStore *model;
-    GtkWidget *treeview;
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
-    GtkTreeSelection *sel;
-    double text_scale = 0.8;
-    gint checkbox_size = (gint)(13 * text_scale); // 13 is the default size
+    GtkTreeSelection *selection;
 
-    model = gtk_tree_store_new(NUM_COLUMNS,
-                               G_TYPE_POINTER, G_TYPE_STRING, G_TYPE_STRING,
-                               G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
-                               G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    widget_tree->priv = PARASITE_WIDGET_TREE_GET_PRIVATE(widget_tree);
 
-    treeview = gtk_tree_view_new_with_model(GTK_TREE_MODEL(model));
-    gtk_tree_view_set_enable_search(GTK_TREE_VIEW(treeview), TRUE);
-    gtk_tree_view_set_search_column(GTK_TREE_VIEW(treeview), WIDGET_NAME);
-    g_object_set_data(G_OBJECT(treeview), "parasite", parasite);
+    widget_tree->priv->model = gtk_tree_store_new(
+        NUM_COLUMNS,
+        G_TYPE_POINTER, // WIDGET
+        G_TYPE_STRING,  // WIDGET_NAME
+        G_TYPE_STRING,  // WIDGET_NAME
+        G_TYPE_BOOLEAN, // WIDGET_REALIZED
+        G_TYPE_BOOLEAN, // WIDGET_VISIBLE
+        G_TYPE_BOOLEAN, // WIDGET_MAPPED
+        G_TYPE_STRING,  // WIDGET_WINDOW
+        G_TYPE_STRING,  // WIDGET_ADDRESS
+        G_TYPE_STRING); // ROW_COLOR
 
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
-    g_signal_connect(G_OBJECT(sel), "changed",
-                     G_CALLBACK(on_widget_selected), parasite);
+    widget_tree->priv->edit_mode_enabled = FALSE;
 
+    gtk_tree_view_set_model(GTK_TREE_VIEW(widget_tree),
+                            GTK_TREE_MODEL(widget_tree->priv->model));
+    gtk_tree_view_set_enable_search(GTK_TREE_VIEW(widget_tree), TRUE);
+    gtk_tree_view_set_search_column(GTK_TREE_VIEW(widget_tree), WIDGET_NAME);
+
+    selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget_tree));
+    g_signal_connect(G_OBJECT(selection), "changed",
+                     G_CALLBACK(parasite_widget_tree_on_widget_selected),
+                     widget_tree);
+
+    // Widget column
     renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
+    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Widget", renderer,
                                                       "text", WIDGET_TYPE,
                                                       "foreground", ROW_COLOR,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
 
+    // Name column
     renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer), "scale", text_scale, NULL);
+    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Name", renderer,
                                                       "text", WIDGET_NAME,
                                                       "foreground", ROW_COLOR,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
 
+    // Realized column
     renderer = gtk_cell_renderer_toggle_new();
     g_object_set(G_OBJECT(renderer),
                  "activatable", TRUE,
-                 "indicator-size", checkbox_size,
+                 "indicator-size", TREE_CHECKBOX_SIZE,
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("Realized",
                                                       renderer,
                                                       "active", WIDGET_REALIZED,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     g_signal_connect(G_OBJECT(renderer), "toggled",
-                     G_CALLBACK(on_toggle_realize), treeview);
+                     G_CALLBACK(on_toggle_realize), widget_tree);
 
-
+    // Mapped column
     renderer = gtk_cell_renderer_toggle_new();
     g_object_set(G_OBJECT(renderer),
                  "activatable", TRUE,
-                 "indicator-size", checkbox_size,
+                 "indicator-size", TREE_CHECKBOX_SIZE,
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("Mapped",
                                                       renderer,
                                                       "active", WIDGET_MAPPED,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
-    g_signal_connect(G_OBJECT(renderer), "toggled",
-                     G_CALLBACK(on_toggle_map), treeview);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
+    //g_signal_connect(G_OBJECT(renderer), "toggled",
+    //                 G_CALLBACK(on_toggle_map), widget_tree);
 
+    // Visible column
     renderer = gtk_cell_renderer_toggle_new();
     g_object_set(G_OBJECT(renderer),
                  "activatable", TRUE,
-                 "indicator-size", checkbox_size,
+                 "indicator-size", TREE_CHECKBOX_SIZE,
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("Visible",
                                                       renderer,
                                                       "active", WIDGET_VISIBLE,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
-    g_signal_connect(G_OBJECT(renderer), "toggled",
-                     G_CALLBACK(on_toggle_visible), treeview);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
+    //g_signal_connect(G_OBJECT(renderer), "toggled",
+    //                 G_CALLBACK(on_toggle_visible), widget_tree);
 
+    // X Window column
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer),
-                 "scale", text_scale,
+                 "scale", TREE_TEXT_SCALE,
                  "family", "monospace",
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("X Window",
@@ -221,24 +230,104 @@ gtkparasite_widget_tree_new(ParasiteWindow *parasite)
                                                       "text", WIDGET_WINDOW,
                                                       "foreground", ROW_COLOR,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
 
+    // Poinder Address column
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer),
-                 "scale", text_scale,
+                 "scale", TREE_TEXT_SCALE,
                  "family", "monospace",
                  NULL);
-    column = gtk_tree_view_column_new_with_attributes("Pointer address",
+    column = gtk_tree_view_column_new_with_attributes("Pointer Address",
                                                       renderer,
                                                       "text", WIDGET_ADDRESS,
                                                       "foreground", ROW_COLOR,
                                                       NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(treeview), column);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
-
-    return treeview;
 }
+
+
+static void
+parasite_widget_tree_class_init(ParasiteWidgetTreeClass *klass)
+{
+    GObjectClass *object_class = G_OBJECT_CLASS(klass);
+
+    klass->widget_changed = NULL;
+
+    parent_class = g_type_class_peek_parent(klass);
+
+    widget_tree_signals[WIDGET_CHANGED] =
+        g_signal_new("widget-changed",
+                     G_OBJECT_CLASS_TYPE(klass),
+                     G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+                     G_STRUCT_OFFSET(ParasiteWidgetTreeClass, widget_changed),
+                     NULL, NULL,
+                     g_cclosure_marshal_VOID__VOID,
+                     G_TYPE_NONE, 0);
+
+    g_type_class_add_private(object_class, sizeof(ParasiteWidgetTreePrivate));
+}
+
+
+GType
+parasite_widget_tree_get_type()
+{
+    static GType type = 0;
+
+    if (type == 0)
+    {
+        static const GTypeInfo info =
+        {
+            sizeof(ParasiteWidgetTreeClass),
+            NULL, // base_init
+            NULL, // base_finalize
+            (GClassInitFunc) parasite_widget_tree_class_init,
+            NULL,
+            NULL, // class_data
+            sizeof(ParasiteWidgetTree),
+            0, // n_preallocs
+            (GInstanceInitFunc) parasite_widget_tree_init,
+        };
+
+        type = g_type_register_static(GTK_TYPE_TREE_VIEW,
+                                      "ParasiteWidgetTree",
+                                      &info, 0);
+    }
+
+    return type;
+}
+
+
+GtkWidget *
+parasite_widget_tree_new()
+{
+    return GTK_WIDGET(g_object_new(PARASITE_TYPE_WIDGET_TREE, NULL));
+}
+
+
+GtkWidget *
+parasite_widget_tree_get_selected_widget(ParasiteWidgetTree *widget_tree)
+{
+    GtkTreeIter iter;
+    GtkTreeSelection *sel;
+    GtkTreeModel *model;
+
+    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget_tree));
+
+    if (gtk_tree_selection_get_selected(sel, &model, &iter))
+    {
+        GtkWidget *widget;
+
+        gtk_tree_model_get(GTK_TREE_MODEL(model), &iter,
+                           WIDGET, &widget,
+                           -1);
+        return widget;
+    }
+    return NULL;
+}
+
 
 static void
 append_widget(GtkTreeStore *model,
@@ -321,18 +410,24 @@ append_widget(GtkTreeStore *model,
     }
 }
 
+
 void
-gtkparasite_widget_tree_scan(GtkWidget *widget_tree,
-                             GtkWidget *window)
+parasite_widget_tree_scan(ParasiteWidgetTree *widget_tree,
+                          GtkWidget *window)
 {
-    GtkTreeStore *model =
-        GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(widget_tree)));
-
-    gtk_tree_store_clear(model);
-    append_widget(model, window, NULL);
-
+    gtk_tree_store_clear(widget_tree->priv->model);
+    append_widget(widget_tree->priv->model, window, NULL);
     gtk_tree_view_columns_autosize(GTK_TREE_VIEW(widget_tree));
 }
+
+
+void
+parasite_widget_tree_set_edit_mode(ParasiteWidgetTree *widget_tree,
+                                   gboolean edit)
+{
+    widget_tree->priv->edit_mode_enabled = edit;
+}
+
 
 static GList *
 get_parents(GtkWidget *widget,
@@ -348,9 +443,10 @@ get_parents(GtkWidget *widget,
     return parents;
 }
 
+
 void
-gtkparasite_widget_tree_select_widget(GtkWidget *widget_tree,
-                                      GtkWidget *widget)
+parasite_widget_tree_select_widget(ParasiteWidgetTree *widget_tree,
+                                   GtkWidget *widget)
 {
     GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget_tree));
     GList *parents = get_parents(widget, NULL);
@@ -407,4 +503,5 @@ gtkparasite_widget_tree_select_widget(GtkWidget *widget_tree,
     g_list_free(parents);
 }
 
-// vim: set et ts=4:
+
+// vim: set et sw=4 ts=4:
