@@ -148,7 +148,7 @@ create_action_list(ParasiteWindow *parasite)
                                        GTK_SHADOW_IN);
    gtk_box_pack_start(GTK_BOX(vbox), swin, TRUE, TRUE, 0);
 
-   parasite->action_list = gtkparasite_action_list_new(parasite);
+   parasite->action_list = parasite_actionlist_new(parasite);
    gtk_widget_show(parasite->action_list);
    gtk_container_add(GTK_CONTAINER(swin), parasite->action_list);
 
