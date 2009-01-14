@@ -100,6 +100,12 @@ gtkparasite_python_shell_init(GtkParasitePythonShell *python_shell)
     priv->line_start_mark = gtk_text_buffer_create_mark(buffer,
                                                         "line_start_mark",
                                                         &iter, TRUE);
+
+    /* Register some tags */
+    gtk_text_buffer_create_tag(buffer, "stdout", NULL);
+    gtk_text_buffer_create_tag(buffer, "stderr",
+                               "foreground", "red",
+                               NULL);
 }
 
 static void
@@ -109,7 +115,8 @@ gtkparasite_python_shell_finalize(GObject *obj)
 
 static void
 gtkparasite_python_shell_append_text(GtkWidget *python_shell,
-                                     const char *str)
+                                     const char *str,
+                                     const char *tag)
 {
     GtkParasitePythonShellPrivate *priv =
         GTKPARASITE_PYTHON_SHELL_GET_PRIVATE(python_shell);
@@ -121,7 +128,7 @@ gtkparasite_python_shell_append_text(GtkWidget *python_shell,
 
     gtk_text_buffer_get_end_iter(buffer, &end);
     gtk_text_buffer_move_mark(buffer, mark, &end);
-    gtk_text_buffer_insert(buffer, &end, str, -1);
+    gtk_text_buffer_insert_with_tags_by_name(buffer, &end, str, -1, tag, NULL);
     gtk_text_view_scroll_to_mark(GTK_TEXT_VIEW(priv->textview), mark,
                                  0, TRUE, 0, 1);
 }
@@ -129,13 +136,15 @@ gtkparasite_python_shell_append_text(GtkWidget *python_shell,
 static void
 gtkparasite_python_shell_log_stdout(const char *text, gpointer python_shell)
 {
-    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text);
+    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text,
+                                         "stdout");
 }
 
 static void
 gtkparasite_python_shell_log_stderr(const char *text, gpointer python_shell)
 {
-    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text);
+    gtkparasite_python_shell_append_text(GTK_WIDGET(python_shell), text,
+                                         "stderr");
 }
 
 static void
@@ -146,7 +155,7 @@ gtkparasite_python_shell_process_line(GtkWidget *python_shell)
 
     char *command = gtkparasite_python_shell_get_input(python_shell);
 
-    gtkparasite_python_shell_append_text(python_shell, "\n");
+    gtkparasite_python_shell_append_text(python_shell, "\n", NULL);
     gtkparasite_python_run(command,
                            gtkparasite_python_shell_log_stdout,
                            gtkparasite_python_shell_log_stderr,
