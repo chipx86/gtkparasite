@@ -1,7 +1,6 @@
 AC_INIT(gtkparasite, 0.1.0, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
-AC_CONFIG_MACRO_DIR([m4])
 AC_COPYRIGHT([Copyright 2008-2009 Christian Hammond])
 
 dnl ################################################################
