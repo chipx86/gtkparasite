@@ -1,6 +1,6 @@
 moduledir = $(libdir)/gtk-2.0/modules
 
-SOURCES = \
+libgtkparasite_la_SOURCES = \
 	action-list.c \
 	inspect-button.c \
 	module.c \
@@ -8,18 +8,12 @@ SOURCES = \
 	prop-list.c \
 	property-cell-renderer.c \
 	property-cell-renderer.h \
-	widget-tree.c \
-	window.c
-
-if ENABLE_PYTHON
-SOURCES += \
 	python-hooks.c \
 	python-hooks.h \
 	python-shell.c \
-	python-shell.h
-endif
-
-libgtkparasite_la_SOURCES = $(SOURCES)
+	python-shell.h \
+	widget-tree.c \
+	window.c
 
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version \

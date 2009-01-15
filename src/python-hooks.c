@@ -3,9 +3,13 @@
 #include <pygobject.h>
 #include <pygtk/pygtk.h>
 
+#include "config.h"
 #include "python-hooks.h"
 
 
+static gboolean python_enabled = FALSE;
+
+#ifdef ENABLE_PYTHON
 static GString *captured_stdout = NULL;
 static GString *captured_stderr = NULL;
 
@@ -65,10 +69,22 @@ static PyMethodDef parasite_python_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+
+static gboolean
+is_blacklisted(void)
+{
+    const char *prgname = g_get_prgname();
+
+    return (!strcmp(prgname, "gimp"));
+}
+#endif // ENABLE_PYTHON
+
 void
 parasite_python_init(void)
 {
-    PyObject *module;
+#ifdef ENABLE_PYTHON
+    if (is_blacklisted())
+        return;
 
     /* This prevents errors such as "undefined symbol: PyExc_ImportError" */
     if (!dlopen(PYTHON_SHARED_LIB, RTLD_NOW | RTLD_GLOBAL))
@@ -100,7 +116,8 @@ parasite_python_init(void)
     init_pygobject();
     init_pygtk();
 
-    module = PyImport_ImportModule("gobject");
+    python_enabled = TRUE;
+#endif // ENABLE_PYTHON
 }
 
 void
@@ -109,6 +126,7 @@ parasite_python_run(const char *command,
                     ParasitePythonLogger stderr_logger,
                     gpointer user_data)
 {
+#ifdef ENABLE_PYTHON
     PyObject *module;
     PyObject *dict;
     PyObject *obj;
@@ -148,6 +166,13 @@ parasite_python_run(const char *command,
 
     g_string_erase(captured_stdout, 0, -1);
     g_string_erase(captured_stderr, 0, -1);
+#endif // ENABLE_PYTHON
+}
+
+gboolean
+parasite_python_is_enabled(void)
+{
+    return python_enabled;
 }
 
 // vim: set et sw=4 ts=4:
