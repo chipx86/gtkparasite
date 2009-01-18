@@ -1,82 +1,121 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-
-	<title>chipx86/gtkparasite @ GitHub</title>
-	
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #2677bc;
-		  font-family: "helvetica"; 
-  		color: #ffffff;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #d98843; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #d98843; }
-    h3 { text-align: center; color: #d98843; }
-    a { color: #d98843; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
-	
-</head>
-
-<body>
-  <a href="http://github.com/chipx86/gtkparasite"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-  
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>Parasite</title>
+  <link rel="stylesheet" type="text/css" href="css/site.css" />
+ </head>
+ <body>
   <div id="container">
+   <img id="parasite-happy" src="images/parasite-happy-left.png"
+        width="131" height="137" border="0" alt="" />
+   <h1 id="title">.Parasite.</h1>
+   <h2 id="subtitle">"So cute I want it to eat my brain"</h1>
 
-    <div class="download">
-      <a href="http://github.com/chipx86/gtkparasite/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/chipx86/gtkparasite/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
-      
-    <h1><a href="http://github.com/chipx86/gtkparasite">Parasite</a> 
-      <span class="small">by <a href="http://github.com/chipx86">chipx86</a></small></h1>
-
-    <div class="description">
-      A utility similar to Firebug but for GTK+ applications.
-    </div>
-
-    <h2>License</h2>
-<p>MIT</p>
-<h2>Authors</h2>
-<p>Christian Hammond (chipx86@chipx86.com)<br/>David Trowbridge (davidt@vmware.com)<br/><br/>      </p>
-<h2>Contact</h2>
-<p> (chipx86@chipx86.com)<br/>      </p>
-
-
-    <h2>Download</h2>
+   <ul id="navbar">
+    <li><a href="#about">About Parasite</a></li>
+    <li><a href="screenshots.html">Screenshots</a></li>
+    <li><a href="#download">Download</a></li>
+    <li><a href="#development">Development</a></li>
+    <li><a href="#contact">Contact Us</a></li>
+   </ul>
+   <div id="main">
+    <a name="about"></a>
+    <h3 class="about">About</h1>
     <p>
-      You can download this project in either
-      <a href="http://github.com/chipx86/gtkparasite/zipball/master">zip</a> or
-      <a href="http://github.com/chipx86/gtkparasite/tarball/master">tar</a> formats.
+     Developing and debugging UIs can be a pain. When something goes wrong,
+     it's not always obvious why. You can waste hours writing logging
+     statements only to find out that a widget is in the wrong container, or an
+     attribute wasn't set correctly.
     </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/chipx86/gtkparasite</pre>
+    <p>
+     Developing isn't much better either. Ever spend time writing temporary
+     code just to test a new feature, code you know you're going to throw away
+     in an hour, and yet you end up spending the next 20 minutes debugging your
+     temporary code? Sucks, doesn't it?
     </p>
-      
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/chipx86/gtkparasite">chipx86/gtkparasite</a>
-    </div>
-    
-  </div>
+    <p>
+     What your program really needs is a good Parasite infestation.
+    </p>
+    <p>
+     Parasite is a debugging and development tool that runs inside your GTK+
+     application's process. It can inspect your application, giving you
+     detailed information on your UI, such as the hierarchy, X window IDs,
+     widget properties, and more. You can modify properties on the fly in order
+     to experiment with the look of your UI.
+    </p>
+    <p>
+     But you can go further than that. You can actually <i>modify</i> your
+     application logic while the program is running! Parasite includes an
+     embedded Python shell that lets you write new code that directly interacts
+     with your application's UI, regardless of the language the application is
+     written in. Create new dialogs, attach temporary signal handlers to
+     buttons, test out new logic, and gather additional debug information.
+	</p>
+    <p>
+     If you've used <a href="http://www.getfirebug.com/">Firebug</a>, it's
+     sort of like that, but for GTK+ applications.
+    </p>
+    <p>
+     Parasite is available under the MIT license.
+    </p>
 
-  
-</body>
+    <!-- Screenshots -->
+    <a name="screenshots"></a>
+    <h3>Screenshots</h3>
+    <p>None yet. We'll have them up soon.</p>
+    <!--
+    <div class="screenshots">
+     <div class="screenshot1"></div>
+     <div class="screenshot2"></div>
+     <div class="screenshot3"></div>
+     <div class="screenshot4"></div>
+    </div>
+    <br clear="both" />
+    -->
+
+    <!-- Download -->
+    <a name="download"></a>
+    <h3>Download</h3>
+    <p>
+     We don't have a release out just yet, but you can download the latest
+     <a href="http://github.com/chipx86/gtkparasite/tarball/master">bleeding
+     edge</a> tarball.
+    </p>
+    <p>
+     You can also clone the <a href="http://git-scm.com">Git</a> repository
+     by running:
+    </p>
+    <pre>
+$ git clone git://github.com/chipx86/gtkparasite
+    </pre>
+
+    <a name="development"></a>
+    <h3>Development</h3>
+    <p>
+     Parasite is <a href="http://github.com/chipx86/gtkparasite/">hosted on
+     GitHub</a>.
+    </p>
+    <p>
+     If you want to contribute, feel free to fork the repository on GitHub
+     and then propose patches.
+    </p>
+    <p>
+     In time, we'll have a
+     <a href="http://www.review-board.org/">Review Board</a> server set up
+     that you can upload patches to.
+    </p>
+
+    <a name="contact"></a>
+    <h3>Contact Us</h3>
+    <p>
+     Parasite is developed by Christian Hammond and David Trowbridge.
+    </p>
+   <img id="parasite-smiling" src="images/parasite-smiling.png"
+        width="130" height="136" border="0" alt="" />
+   </div>
+  </div>
+ </body>
 </html>

@@ -1,0 +1,139 @@
+body {
+  margin: 20px;
+  font-family: DejaVu Sans, Verdana, Tahoma, Sans-Serif;
+  font-size: 10pt;
+}
+
+a {
+  color: blue;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: blue;
+}
+
+h3 {
+  font-size: 120%;
+  border-bottom: 1px #C0C0C0 solid;
+  margin-top: 40px;
+}
+
+h3.about {
+  margin-top: 0;
+}
+
+p {
+  line-height: 1.5em;
+}
+
+pre {
+  margin: 20px;
+}
+
+#container {
+  border: 4px #3465a4 solid;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  margin-top: 60px;
+}
+
+#main {
+  position: relative;
+  background-color: #f4f4f4;
+  border-top: 1px #E0E0E0 solid;
+  border-radius: 0 0 9px 9px;
+  -moz-border-radius: 0 0 9px 9px;
+  -webkit-border-radius: 0 0 9px 9px;
+  padding: 30px;
+}
+
+#navbar {
+  list-style: none;
+  margin: 30px 0;
+  padding: 0;
+  text-align: center;
+}
+
+#navbar li {
+  background-color: #fef4a5;
+  border: 1px #826b03 solid;
+  display: inline;
+  padding: 4px 8px;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+
+#navbar li:hover {
+  background-color: #feea51;
+}
+
+#navbar li a {
+  color: black;
+  text-decoration: none;
+}
+
+#parasite-happy {
+  position: absolute;
+  left: 40px;
+  top: 10px;
+}
+
+#parasite-smiling {
+  position: absolute;
+  right: 40px;
+  bottom: 20px;
+}
+
+#subtitle {
+  font-size: small;
+  font-weight: normal;
+  text-align: center;
+}
+
+#title {
+  font-size: 22pt;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.screenshot1 {
+  background: url(../images/screenshot_bg_1.png) no-repeat top left;
+  width: 200px;
+  height: 240px;
+  padding: 20px;
+  margin-top: 70px;
+  float: left;
+}
+
+.screenshot2 {
+  background: url(../images/screenshot_bg_2.png) no-repeat top left;
+  width: 266px;
+  height: 240px;
+  padding: 20px;
+  margin-top: 70px;
+  float: left;
+}
+
+.screenshot3 {
+  background: url(../images/screenshot_bg_3.png) no-repeat top left;
+  width: 200px;
+  height: 240px;
+  padding: 20px;
+  float: left;
+}
+
+.screenshot4 {
+  background: url(../images/screenshot_bg_4.png) no-repeat top left;
+  width: 200px;
+  height: 240px;
+  padding: 20px;
+  float: left;
+}
