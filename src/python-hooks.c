@@ -2,6 +2,7 @@
 #include <Python.h>
 #include <pygobject.h>
 #include <pygtk/pygtk.h>
+#include <signal.h>
 
 #include "config.h"
 #include "python-hooks.h"
