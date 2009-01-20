@@ -18,6 +18,16 @@ a:visited {
   color: blue;
 }
 
+dl.faq dd {
+  font-weight: bold;
+  margin-left: 0;
+  margin-bottom: 0.5em;
+}
+
+dl.faq dt {
+  margin-bottom: 2em;
+}
+
 h3 {
   font-size: 120%;
   border-bottom: 1px #C0C0C0 solid;
@@ -61,7 +71,7 @@ ul {
 
 #navbar {
   list-style: none;
-  margin: 30px 0;
+  margin: 30px 0 20px 0;
   padding: 0;
   text-align: center;
 }
@@ -71,6 +81,8 @@ ul {
 }
 
 #navbar li a {
+  display: inline-block;
+  margin-bottom: 10px;
   background-color: #fef4a5;
   border: 1px #826b03 solid;
   padding: 4px 8px;

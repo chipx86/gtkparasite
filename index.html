@@ -20,6 +20,7 @@
     <li><a href="#usage">Usage</a></li>
     <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#download">Download</a></li>
+    <li><a href="#faq">FAQ</a></li>
     <li><a href="#development">Development</a></li>
     <li><a href="#contact">Contact Us</a></li>
    </ul>
@@ -186,6 +187,31 @@ $ GTK_MODULES=gtkparasite <i>appname</i>
 $ git clone git://github.com/chipx86/gtkparasite
     </pre>
 
+    <!-- FAQ -->
+    <a name="faq"></a>
+    <h3>FAQ</h3>
+    <dl class="faq">
+     <dd>Why "Parasite?"</dd>
+     <dt>Parasite runs inside of another application and allows for
+         manipulating the application. We thought the name was appropriate.
+         Bonus: We got to create a cute little logo and draw him crawling
+         on boxes. Much better t-shirt opportunities.</dt>
+     </dt>
+
+     <dd>Will there be t-shirts?</dd>
+     <dt>Yes, I think that's something we just have to do.</dt>
+
+     <dd>Why doesn't the Python shell work with GIMP?</dd>
+     <dt>GIMP defines a <tt>GtkScaleButton</tt> type that conflicts with
+         GTK's own <tt>GtkScaleButton</tt>. This isn't a problem when
+         running GIMP itself, since it never uses GTK's, but we use PyGTK
+         and that does register GTK's version. This causes a conflict that
+         leads to deadlocks. So we had to disable the Python shell. A
+         <a href="http://bugzilla.gnome.org/show_bug.cgi?id=567840">bug report</a>
+         has been filed with GIMP on this.</dd>
+    </dl>
+
+    <!-- Development -->
     <a name="development"></a>
     <h3>Development</h3>
     <p>
