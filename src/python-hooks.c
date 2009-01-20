@@ -83,6 +83,9 @@ void
 parasite_python_init(void)
 {
 #ifdef ENABLE_PYTHON
+    int res;
+    struct sigaction old_sigint;
+
     if (is_blacklisted())
         return;
 
@@ -96,7 +99,13 @@ parasite_python_init(void)
     captured_stdout = g_string_new("");
     captured_stderr = g_string_new("");
 
-    Py_Initialize();
+    /* Back up and later restore SIGINT so Python doesn't steal it from us. */
+    res = sigaction(SIGINT, NULL, &old_sigint);
+
+    if (!Py_IsInitialized())
+        Py_Initialize();
+
+    res = sigaction(SIGINT, &old_sigint, NULL);
 
     Py_InitModule("parasite", parasite_python_methods);
     PyRun_SimpleString(
