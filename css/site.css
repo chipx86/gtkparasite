@@ -36,6 +36,11 @@ pre {
   margin: 20px;
 }
 
+ul {
+  padding-left: 2em;
+  list-style: square;
+}
+
 #container {
   border: 4px #3465a4 solid;
   border-radius: 10px;
@@ -62,22 +67,22 @@ pre {
 }
 
 #navbar li {
+  display: inline;
+}
+
+#navbar li a {
   background-color: #fef4a5;
   border: 1px #826b03 solid;
-  display: inline;
   padding: 4px 8px;
   border-radius: 10px;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
-}
-
-#navbar li:hover {
-  background-color: #feea51;
-}
-
-#navbar li a {
   color: black;
   text-decoration: none;
+}
+
+#navbar li a:hover {
+  background-color: #feea51;
 }
 
 #parasite-happy {
@@ -104,36 +109,41 @@ pre {
   margin-bottom: 0;
 }
 
+#screenshot-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  margin-top: 40px;
+}
+
+#screenshot-table td {
+  vertical-align: top;
+  margin: 0;
+}
+
 .screenshot1 {
   background: url(../images/screenshot_bg_1.png) no-repeat top left;
-  width: 200px;
-  height: 240px;
-  padding: 20px;
-  margin-top: 70px;
-  float: left;
+  width: 280px;
+  height: 300px;
+  padding: 20px 0 0 20px;
 }
 
 .screenshot2 {
   background: url(../images/screenshot_bg_2.png) no-repeat top left;
-  width: 266px;
-  height: 240px;
-  padding: 20px;
-  margin-top: 70px;
-  float: left;
+  width: 307px;
+  height: 300px;
+  padding: 20px 0 0 20px;
 }
 
 .screenshot3 {
   background: url(../images/screenshot_bg_3.png) no-repeat top left;
-  width: 200px;
-  height: 240px;
-  padding: 20px;
-  float: left;
+  width: 280px;
+  height: 300px;
+  padding: 89px 0 0 20px;
 }
 
 .screenshot4 {
   background: url(../images/screenshot_bg_4.png) no-repeat top left;
-  width: 200px;
-  height: 240px;
-  padding: 20px;
-  float: left;
+  width: 307px;
+  height: 300px;
+  padding: 90px 0 0 20px;
 }

@@ -16,7 +16,8 @@
 
    <ul id="navbar">
     <li><a href="#about">About Parasite</a></li>
-    <li><a href="screenshots.html">Screenshots</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#screenshots">Screenshots</a></li>
     <li><a href="#download">Download</a></li>
     <li><a href="#development">Development</a></li>
     <li><a href="#contact">Contact Us</a></li>
@@ -53,7 +54,7 @@
      with your application's UI, regardless of the language the application is
      written in. Create new dialogs, attach temporary signal handlers to
      buttons, test out new logic, and gather additional debug information.
-	</p>
+    </p>
     <p>
      If you've used <a href="http://www.getfirebug.com/">Firebug</a>, it's
      sort of like that, but for GTK+ applications.
@@ -62,19 +63,58 @@
      Parasite is available under the MIT license.
     </p>
 
+    <!-- Features -->
+    <a name="features"></a>
+    <h3>Features</h3>
+    <ul>
+     <li>Attaches to GTK+ applications.</li>
+     <li>Display the entire widget hierarchy of any window.</li>
+     <li>Click a widget to inspect it.</li>
+     <li>Allows modification of the properties for any widget.</li>
+     <li>Python shell for dynamic scripting and inspection of applications.</li>
+     <li>Easily enable GTK+ graphical update debugging.</li>
+     <li>Displays all GtkActions registered in a program.</li>
+    </ul>
+
     <!-- Screenshots -->
     <a name="screenshots"></a>
     <h3>Screenshots</h3>
-    <p>None yet. We'll have them up soon.</p>
-    <!--
-    <div class="screenshots">
-     <div class="screenshot1"></div>
-     <div class="screenshot2"></div>
-     <div class="screenshot3"></div>
-     <div class="screenshot4"></div>
-    </div>
+    <table id="screenshot-table">
+     <tr>
+      <td class="screenshot1">
+       <a href="images/screenshots/properties.png">
+        <img src="images/screenshots/properties_thumb.png" width="200"
+             height="150" border="0" alt="Properties" />
+       </a>
+      </td>
+      <td class="screenshot2">
+       <a href="images/screenshots/actionlist.png">
+        <img src="images/screenshots/actionlist_thumb.png" width="200"
+             height="150" border="0" alt="Properties" />
+       </a>
+      </td>
+     </tr>
+     <tr>
+      <td class="screenshot3">
+       <a href="images/screenshots/python_shell.png">
+        <img src="images/screenshots/python_shell_thumb.png" width="200"
+             height="150" border="0" alt="Properties" />
+       </a>
+      </td>
+      <td class="screenshot4">
+       <a href="images/screenshots/signals.png">
+        <img src="images/screenshots/signals_thumb.png" width="200"
+              height="150" border="0" alt="Properties" />
+       </a>
+      </td>
+     </tr>
+    </table>
     <br clear="both" />
-    -->
+
+    <p>
+     We also have a <a href="video/parasite-intro.avi">screencast</a>
+     demoing and explaining Parasite.
+    </p>
 
     <!-- Download -->
     <a name="download"></a>
@@ -111,10 +151,16 @@ $ git clone git://github.com/chipx86/gtkparasite
     <a name="contact"></a>
     <h3>Contact Us</h3>
     <p>
-     Parasite is developed by Christian Hammond and David Trowbridge.
+     Parasite is developed by
+     <a href="mailto:chipx86@chipx86.com">Christian Hammond</a> and
+     <a href="mailto:trowbrds@gmail.com">David Trowbridge</a>.
     </p>
-   <img id="parasite-smiling" src="images/parasite-smiling.png"
-        width="130" height="136" border="0" alt="" />
+    <p>
+     You can also reach us on our
+     <a href="http://groups.google.com/group/gtkparasite">mailing list</a>.
+    </p>
+    <img id="parasite-smiling" src="images/parasite-smiling.png"
+         width="130" height="136" border="0" alt="" />
    </div>
   </div>
  </body>
