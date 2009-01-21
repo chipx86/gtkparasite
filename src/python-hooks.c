@@ -2,10 +2,15 @@
 #include <Python.h>
 #include <pygobject.h>
 #include <pygtk/pygtk.h>
+#include <signal.h>
 
+#include "config.h"
 #include "python-hooks.h"
 
 
+static gboolean python_enabled = FALSE;
+
+#ifdef ENABLE_PYTHON
 static GString *captured_stdout = NULL;
 static GString *captured_stderr = NULL;
 
@@ -65,10 +70,25 @@ static PyMethodDef parasite_python_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+
+static gboolean
+is_blacklisted(void)
+{
+    const char *prgname = g_get_prgname();
+
+    return (!strcmp(prgname, "gimp"));
+}
+#endif // ENABLE_PYTHON
+
 void
 parasite_python_init(void)
 {
-    PyObject *module;
+#ifdef ENABLE_PYTHON
+    int res;
+    struct sigaction old_sigint;
+
+    if (is_blacklisted())
+        return;
 
     /* This prevents errors such as "undefined symbol: PyExc_ImportError" */
     if (!dlopen(PYTHON_SHARED_LIB, RTLD_NOW | RTLD_GLOBAL))
@@ -80,7 +100,13 @@ parasite_python_init(void)
     captured_stdout = g_string_new("");
     captured_stderr = g_string_new("");
 
-    Py_Initialize();
+    /* Back up and later restore SIGINT so Python doesn't steal it from us. */
+    res = sigaction(SIGINT, NULL, &old_sigint);
+
+    if (!Py_IsInitialized())
+        Py_Initialize();
+
+    res = sigaction(SIGINT, &old_sigint, NULL);
 
     Py_InitModule("parasite", parasite_python_methods);
     PyRun_SimpleString(
@@ -100,7 +126,8 @@ parasite_python_init(void)
     init_pygobject();
     init_pygtk();
 
-    module = PyImport_ImportModule("gobject");
+    python_enabled = TRUE;
+#endif // ENABLE_PYTHON
 }
 
 void
@@ -109,6 +136,7 @@ parasite_python_run(const char *command,
                     ParasitePythonLogger stderr_logger,
                     gpointer user_data)
 {
+#ifdef ENABLE_PYTHON
     PyObject *module;
     PyObject *dict;
     PyObject *obj;
@@ -148,6 +176,13 @@ parasite_python_run(const char *command,
 
     g_string_erase(captured_stdout, 0, -1);
     g_string_erase(captured_stderr, 0, -1);
+#endif // ENABLE_PYTHON
+}
+
+gboolean
+parasite_python_is_enabled(void)
+{
+    return python_enabled;
 }
 
 // vim: set et sw=4 ts=4:

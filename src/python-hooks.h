@@ -11,5 +11,6 @@ void parasite_python_run(const char *command,
                          ParasitePythonLogger stdout_logger,
                          ParasitePythonLogger stderr_logger,
                          gpointer user_data);
+gboolean parasite_python_is_enabled(void);
 
 #endif // _GTKPARASITE_PYTHON_MODULE_H_

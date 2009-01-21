@@ -179,7 +179,12 @@ parasite_proplist_set_widget(ParasitePropList* proplist,
     proplist->priv->widget = widget;
 
     for (l = proplist->priv->signal_cnxs; l != NULL; l = l->next)
-        g_signal_handler_disconnect(widget, GPOINTER_TO_UINT(l->data));
+    {
+        gulong id = GPOINTER_TO_UINT(l->data);
+
+        if (g_signal_handler_is_connected(widget, id))
+            g_signal_handler_disconnect(widget, id);
+    }
 
     g_list_free(proplist->priv->signal_cnxs);
     proplist->priv->signal_cnxs = NULL;
