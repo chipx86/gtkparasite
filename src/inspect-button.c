@@ -97,8 +97,8 @@ on_highlight_widget(GtkWidget *grab_window,
         return;
     }
 
-    if (gdk_window_get_toplevel(selected_window) ==
-        gtk_widget_get_window(parasite->window)) {
+    if (gdk_window_get_toplevel(selected_window) == parasite->window->window)
+    {
        /* Don't hilight things in the parasite window */
         parasite->selected_window = NULL;
         return;
