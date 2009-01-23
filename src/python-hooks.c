@@ -1,7 +1,11 @@
 #include <dlfcn.h>
+
+#ifdef ENABLE_PYTHON
 #include <Python.h>
 #include <pygobject.h>
 #include <pygtk/pygtk.h>
+#endif // ENABLE_PYTHON
+
 #include <signal.h>
 
 #include "config.h"
