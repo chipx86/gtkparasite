@@ -1,5 +1,7 @@
 #include <dlfcn.h>
 
+#include "config.h"
+
 #ifdef ENABLE_PYTHON
 #include <Python.h>
 #include <pygobject.h>
@@ -8,7 +10,6 @@
 
 #include <signal.h>
 
-#include "config.h"
 #include "python-hooks.h"
 
 
