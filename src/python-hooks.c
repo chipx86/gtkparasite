@@ -1,7 +1,11 @@
 #include <dlfcn.h>
+
+#ifdef ENABLE_PYTHON
 #include <Python.h>
 #include <pygobject.h>
 #include <pygtk/pygtk.h>
+#endif // ENABLE_PYTHON
+
 #include <signal.h>
 
 #include "config.h"
@@ -86,6 +90,7 @@ parasite_python_init(void)
 #ifdef ENABLE_PYTHON
     int res;
     struct sigaction old_sigint;
+    PyObject *pygtk;
 
     if (is_blacklisted())
         return;
@@ -123,8 +128,35 @@ parasite_python_init(void)
         "\n"
     );
 
-    init_pygobject();
-    init_pygtk();
+    if (!pygobject_init(-1, -1, -1))
+        return;
+
+    pygtk = PyImport_ImportModule("gtk");
+
+    if (pygtk != NULL)
+    {
+        PyObject *module_dict = PyModule_GetDict(pygtk);
+        PyObject *cobject = PyDict_GetItemString(module_dict, "_PyGtk_API");
+
+        /*
+         * This seems to be NULL when we're running a PyGTK program.
+         * We really need to find out why.
+         */
+        if (cobject != NULL)
+        {
+            if (PyCObject_Check(cobject))
+                _PyGtk_API = (struct _PyGtk_FunctionStruct*)
+                PyCObject_AsVoidPtr(cobject);
+            else {
+                PyErr_SetString(PyExc_RuntimeError,
+                                "could not find _PyGtk_API object");
+                return;
+            }
+        }
+    } else {
+        PyErr_SetString(PyExc_ImportError, "could not import gtk");
+        return;
+    }
 
     python_enabled = TRUE;
 #endif // ENABLE_PYTHON
