@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="133"
+   height="137"
+   id="svg8118"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   version="1.0"
+   sodipodi:docname="parasite.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs8120">
+    <filter
+       inkscape:collect="always"
+       id="filter8978"
+       x="-0.033658538"
+       width="1.0673171"
+       y="-0.22439024"
+       height="1.4487805">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.402439"
+         id="feGaussianBlur8980" />
+    </filter>
+    <linearGradient
+       id="linearGradient8730"
+       inkscape:collect="always">
+      <stop
+         id="stop8732"
+         offset="0"
+         style="stop-color:#ffffff;stop-opacity:1" />
+      <stop
+         id="stop8734"
+         offset="1"
+         style="stop-color:#feef75;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient8730"
+       id="linearGradient8074"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.5277137,0,0,0.5277137,-9.2310503,-156.24426)"
+       x1="32"
+       y1="340.36218"
+       x2="228"
+       y2="548.36212" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient8667">
+      <stop
+         style="stop-color:#f2db03;stop-opacity:1"
+         offset="0"
+         id="stop8669" />
+      <stop
+         style="stop-color:#d0ab00;stop-opacity:1"
+         offset="1"
+         id="stop8671" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient8667"
+       id="linearGradient8076"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.5277137,0,0,0.5277137,-22.95165,-172.60339)"
+       x1="188.47487"
+       y1="556.55457"
+       x2="249"
+       y2="595.36218" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient8714">
+      <stop
+         style="stop-color:#fce94f;stop-opacity:1;"
+         offset="0"
+         id="stop8716" />
+      <stop
+         style="stop-color:#f2db03;stop-opacity:1"
+         offset="1"
+         id="stop8718" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient8714"
+       id="linearGradient8078"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.5101151,0,0,0.523314,-7.1584503,-154.38577)"
+       x1="89"
+       y1="384.36218"
+       x2="168"
+       y2="473.36218" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient8677">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop8679" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop8681" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient8677"
+       id="linearGradient8080"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.5277137,0,0,-0.6665857,-22.95165,506.66342)"
+       x1="209"
+       y1="560.36218"
+       x2="209"
+       y2="579.38849" />
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective8126" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="42.5"
+     inkscape:cy="87"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1443"
+     inkscape:window-height="700"
+     inkscape:window-x="0"
+     inkscape:window-y="149" />
+  <metadata
+     id="metadata8123">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       sodipodi:type="arc"
+       style="opacity:0.23553718;fill:#000000;fill-opacity:0.70852015;fill-rule:nonzero;stroke:none;stroke-width:2.11100006;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter8978)"
+       id="path8024"
+       sodipodi:cx="352"
+       sodipodi:cy="330.5"
+       sodipodi:rx="50"
+       sodipodi:ry="7.5"
+       d="M 402,330.5 A 50,7.5 0 1 1 302,330.5 A 50,7.5 0 1 1 402,330.5 z"
+       transform="matrix(1.0975,0,0,1,-312.35215,-201)" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="fill:#fce94f;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:1.58314109;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 12.69885,51.77819 C 12.25975,50.93507 1.3383497,50.45982 0.82774966,51.26161 C 0.31704966,52.06341 5.3662497,61.75926 6.3159497,61.80059"
+       id="path8026"
+       sodipodi:nodetypes="csc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="csc"
+       id="path8028"
+       d="M 14.07435,67.84054 C 13.58305,67.02679 2.6533497,67.24124 2.1943497,68.07363 C 1.7352497,68.90603 7.3858497,78.26417 8.3362497,78.24552"
+       style="fill:#fce94f;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:1.58314109;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="fill:#fce94f;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:1.58314109;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 16.18525,83.67195 C 15.69385,82.85821 4.7642497,83.07265 4.3051497,83.90504 C 3.8461497,84.73742 9.4966497,94.09562 10.44705,94.07692"
+       id="path8030"
+       sodipodi:nodetypes="csc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="fill:#fef5a9;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:2.11085486;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 35.09685,96.72172 C 47.23422,99.71212 59.37162,102.70252 71.50912,105.69282 C 91.03452,114.48812 112.67082,112.20132 130.08532,132.07852 C 98.42252,132.07852 66.75962,132.07852 35.09685,132.07852 C 35.09685,120.29292 35.09685,108.50732 35.09685,96.72172 z"
+       id="path8032"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="fill:url(#linearGradient8074);fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:2.11100006;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4.0999999;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 71.58382,132.07852 C 51.95252,132.07852 42.87542,132.07852 23.24405,132.07852 C 10.98965,121.27102 1.6912497,34.0632 5.6006497,23.56139 C 16.58595,-5.94861 67.28262,-4.85014 92.02452,18.81197 C 103.35832,29.65109 95.03892,74.25973 79.71762,112.75472"
+       id="path8034"
+       sodipodi:nodetypes="ccsss" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="ccccc"
+       id="path8036"
+       d="M 27.70885,103.05432 C 39.84622,105.28592 84.17422,120.31462 82.98682,112.12392 C 103.04002,117.63202 113.59432,120.54302 122.69732,129.44002 C 91.03452,129.44002 59.37162,129.44002 27.70885,129.44002 C 27.70885,120.64472 27.70885,111.84952 27.70885,103.05432 z"
+       style="fill:url(#linearGradient8076);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="ccsss"
+       id="path8038"
+       d="M 70.37902,129.44002 C 52.01492,129.44002 44.20502,129.44002 25.84095,129.44002 C 12.84525,117.02142 5.4033497,35.43006 8.6551497,25.30048 C 17.67095,-2.7849 66.29012,-2.06815 89.51702,20.55106 C 98.63832,29.43365 94.53312,57.93062 77.98782,110.89572"
+       style="fill:url(#linearGradient8078);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.78026907" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:type="arc"
+       style="opacity:0.23008267;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path8040"
+       sodipodi:cx="494.5"
+       sodipodi:cy="562.36218"
+       sodipodi:rx="16.5"
+       sodipodi:ry="28"
+       d="M 511,562.36218 A 16.5,28 0 1 1 478,562.36218 A 16.5,28 0 1 1 511,562.36218 z"
+       transform="matrix(0.5265089,2.8309034e-2,-3.5638465e-2,0.4182267,-177.98255,-203.12498)" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       transform="matrix(0.5265089,2.8309034e-2,-3.5638465e-2,0.4182267,-212.81175,-203.12498)"
+       d="M 511,562.36218 A 16.5,28 0 1 1 478,562.36218 A 16.5,28 0 1 1 511,562.36218 z"
+       sodipodi:ry="28"
+       sodipodi:rx="16.5"
+       sodipodi:cy="562.36218"
+       sodipodi:cx="494.5"
+       id="path8042"
+       style="opacity:0.23008267;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path8044"
+       sodipodi:cx="494.5"
+       sodipodi:cy="562.36218"
+       sodipodi:rx="16.5"
+       sodipodi:ry="28"
+       d="M 511,562.36218 A 16.5,28 0 1 1 478,562.36218 A 16.5,28 0 1 1 511,562.36218 z"
+       transform="matrix(0.5265089,3.5638465e-2,-3.5638465e-2,0.5265089,-214.92255,-271.73296)" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:type="arc"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path8046"
+       sodipodi:cx="318.5"
+       sodipodi:cy="591.86218"
+       sodipodi:rx="7.5"
+       sodipodi:ry="7.5"
+       d="M 326,591.86218 A 7.5,7.5 0 1 1 311,591.86218 A 7.5,7.5 0 1 1 326,591.86218 z"
+       transform="matrix(0.5277137,0,0,0.5277137,-143.27035,-277.09069)" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       transform="matrix(0.5264162,3.6983375e-2,-3.6983375e-2,0.5264162,-179.29125,-272.34585)"
+       d="M 511,562.36218 A 16.5,28 0 1 1 478,562.36218 A 16.5,28 0 1 1 511,562.36218 z"
+       sodipodi:ry="28"
+       sodipodi:rx="16.5"
+       sodipodi:cy="562.36218"
+       sodipodi:cx="494.5"
+       id="path8048"
+       style="opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       transform="matrix(0.5277137,0,0,0.5277137,-108.96895,-277.6184)"
+       d="M 326,591.86218 A 7.5,7.5 0 1 1 311,591.86218 A 7.5,7.5 0 1 1 326,591.86218 z"
+       sodipodi:ry="7.5"
+       sodipodi:rx="7.5"
+       sodipodi:cy="591.86218"
+       sodipodi:cx="318.5"
+       id="path8050"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="cczc"
+       id="path8052"
+       d="M 25.41695,66.24766 C 43.49732,71.42869 58.68392,65.50136 58.68392,65.50136 C 58.68392,65.50136 50.16772,92.12322 41.89892,92.19242 C 33.60895,92.26182 31.12485,86.53412 25.41695,66.24766 z"
+       style="fill:#e54747;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.05542743;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.05542743;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 61.29592,63.97951 C 61.29592,63.97951 41.11632,73.54238 22.43175,64.53924"
+       id="path8054"
+       sodipodi:nodetypes="cs" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:type="star"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.56790876;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path8056"
+       sodipodi:sides="3"
+       sodipodi:cx="268"
+       sodipodi:cy="404.36218"
+       sodipodi:r1="13.892444"
+       sodipodi:r2="6.9462218"
+       sodipodi:arg1="0.52359878"
+       sodipodi:arg2="1.5707963"
+       inkscape:flatsided="true"
+       inkscape:rounded="0.08"
+       inkscape:randomized="0"
+       d="M 280.03121,411.3084 C 279.06871,412.9755 256.93129,412.9755 255.96879,411.3084 C 255.00629,409.64131 266.07501,390.46974 268,390.46974 C 269.92499,390.46974 280.99371,409.64131 280.03121,411.3084 z"
+       transform="matrix(-0.2639721,3.5075895e-2,-6.3683645e-2,-0.3230285,149.05712,190.94002)" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       transform="matrix(0.2639721,3.5075895e-2,6.3683645e-2,-0.3230285,-65.88195,191.21992)"
+       d="M 280.03121,411.3084 C 279.06871,412.9755 256.93129,412.9755 255.96879,411.3084 C 255.00629,409.64131 266.07501,390.46974 268,390.46974 C 269.92499,390.46974 280.99371,409.64131 280.03121,411.3084 z"
+       inkscape:randomized="0"
+       inkscape:rounded="0.08"
+       inkscape:flatsided="true"
+       sodipodi:arg2="1.5707963"
+       sodipodi:arg1="0.52359878"
+       sodipodi:r2="6.9462218"
+       sodipodi:r1="13.892444"
+       sodipodi:cy="404.36218"
+       sodipodi:cx="268"
+       sodipodi:sides="3"
+       id="path8058"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.56790876;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       sodipodi:type="star" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="csc"
+       id="path8060"
+       d="M 73.93612,51.77819 C 74.37522,50.93507 85.29662,50.45982 85.80722,51.26161 C 86.31792,52.06341 81.26872,61.75926 80.31902,61.80059"
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:1.58314109;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:1.58314109;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 72.56062,67.84054 C 73.05192,67.02679 83.98162,67.24124 84.44062,68.07363 C 84.89972,68.90603 79.24912,78.26417 78.29872,78.24552"
+       id="path8062"
+       sodipodi:nodetypes="csc" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="csc"
+       id="path8064"
+       d="M 70.44972,83.67195 C 70.94112,82.85821 81.87072,83.07265 82.32982,83.90504 C 82.78882,84.73742 77.13832,94.09562 76.18792,94.07692"
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#997c00;stroke-width:1.58314109;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="cs"
+       id="path8066"
+       d="M 14.51605,30.75751 C 14.51605,30.75751 16.62685,14.9261 27.70885,15.45382"
+       style="opacity:0.43388433;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.05542743;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       style="opacity:0.43388433;fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.05542743;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 73.09222,30.75751 C 73.09222,30.75751 70.98142,14.9261 59.89942,15.45382"
+       id="path8068"
+       sodipodi:nodetypes="cs" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/chipx86/Desktop/parasite-logo-1.png"
+       sodipodi:nodetypes="ccscc"
+       id="path8070"
+       d="M 48.55352,74.2347 C 39.64182,74.2347 32.37275,77.43666 30.89165,82.08444 C 33.80835,89.08672 36.58532,91.77612 41.89112,91.73172 C 46.75412,91.69102 51.28832,82.66785 54.53982,75.07574 C 52.55172,74.6636 50.80432,74.2347 48.55352,74.2347 z"
+       style="opacity:1;fill:#f86565;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       style="opacity:0.16528925;fill:url(#linearGradient8080);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 22.84851,133.13402 L 132.43452,133.13402 C 129.28092,129.44352 123.74912,123.86672 117.79392,120.46882 L 16.09851,120.46882 C 17.72351,124.81552 19.56726,130.28732 22.84851,133.13402 z"
+       id="rect8072"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+</svg>
