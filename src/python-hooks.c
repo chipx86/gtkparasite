@@ -170,9 +170,12 @@ parasite_python_run(const char *command,
                     gpointer user_data)
 {
 #ifdef ENABLE_PYTHON
+    PyGILState_STATE gstate;
     PyObject *module;
     PyObject *dict;
     PyObject *obj;
+
+    gstate = PyGILState_Ensure();
 
     module = PyImport_AddModule("__main__");
     dict = PyModule_GetDict(module);
@@ -207,6 +210,7 @@ parasite_python_run(const char *command,
     }
     Py_XDECREF(obj);
 
+    PyGILState_Release(gstate);
     g_string_erase(captured_stdout, 0, -1);
     g_string_erase(captured_stderr, 0, -1);
 #endif // ENABLE_PYTHON
