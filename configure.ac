@@ -55,6 +55,9 @@ PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
+GDK_BACKEND=`pkg-config --variable=target gtk+-2.0`
+AM_CONDITIONAL(HAVE_X11, [test x"$GDK_BACKEND" = x"x11"])
+
 AM_PATH_PYTHON([2.4], [
     AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
     if test x"$PYTHON_CONFIG" == x""; then
@@ -69,7 +72,11 @@ AM_PATH_PYTHON([2.4], [
     fi
 
     # Kind of a hacky way to get this, but that's alright..
-    PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so"
+    if test x"$GDK_BACKEND" == x"quartz"; then
+        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.dylib"
+    else
+        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so"
+    fi
     AC_SUBST(PYTHON_SHARED_LIB)
 
     PKG_CHECK_MODULES(PYGTK,

@@ -25,7 +25,9 @@
 #include "widget-tree.h"
 
 #include <string.h>
+#if HAVE_X11
 #include <gdk/gdkx.h>
+#endif
 
 
 enum
@@ -389,8 +391,12 @@ append_widget(GtkTreeStore *model,
 
     if (widget->window)
     {
-        window_info = g_strdup_printf("%p (XID 0x%x)", widget->window,
-                                      (int)GDK_WINDOW_XID(widget->window));
+#if HAVE_X11
+	window_info = g_strdup_printf("%p (XID 0x%x)", widget->window,
+	                              (int)GDK_WINDOW_XID(widget->window));
+#else
+	window_info = g_strdup("");
+#endif
     }
     else
     {
