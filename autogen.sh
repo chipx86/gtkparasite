@@ -39,6 +39,7 @@ echo "Generating configuration files for $PACKAGE, please wait..."
 
 [ $DIE -eq 1 ] && exit 1;
 
+mkdir -p m4
 
 autoreconf --force --install --verbose
 
