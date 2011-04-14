@@ -1,6 +1,12 @@
 #!/bin/sh
 # Run this to generate all the initial makefiles, etc.
 
+test -n "$srcdir" || srcdir=`dirname "$0"`
+test -n "$srcdir" || srcdir=.
+
+olddir=`pwd`
+cd $srcdir
+
 DIE=0
 
 PACKAGE=gtkparasite
@@ -33,26 +39,9 @@ echo "Generating configuration files for $PACKAGE, please wait..."
 
 [ $DIE -eq 1 ] && exit 1;
 
-echo "  libtoolize --copy --force"
-libtoolize --copy --force
-echo "  aclocal $ACLOCAL_FLAGS"
-aclocal $ACLOCAL_FLAGS
-echo "  autoheader"
-autoheader
-echo "  automake --add-missing"
-automake --add-missing
-echo "  autoconf"
-autoconf
 
-if [ -x config.status -a -z "$*" ]; then
-	./config.status --recheck
-else
-	if test -z "$*"; then
-		echo "I am going to run ./configure with no arguments - if you wish"
-		echo "to pass any to it, please specify them on the $0  command line."
-		echo "If you do not wish to run ./configure, press  Ctrl-C now."
-		trap 'echo "configure aborted" ; exit 0' 1 2 15
-		sleep 1
-	fi
-	./configure "$@";
-fi
+autoreconf --force --install --verbose
+
+
+cd $olddir
+test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"
