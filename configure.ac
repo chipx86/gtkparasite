@@ -51,11 +51,11 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_EXEEXT
 
-PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
+PKG_CHECK_MODULES(GTK, [gtk+-3.0 >= 3.0.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
-GDK_BACKEND=`pkg-config --variable=target gtk+-2.0`
+GDK_BACKEND=`pkg-config --variable=targets gtk+-3.0`
 AM_CONDITIONAL(HAVE_X11, [test x"$GDK_BACKEND" = x"x11"])
 
 AM_PATH_PYTHON([2.4], [
