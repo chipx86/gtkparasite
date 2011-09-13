@@ -21,7 +21,7 @@ libgtkparasite_la_SOURCES = \
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version \
 	$(GTK_LIBS) \
-	$(PYGTK_LIBS) \
+	$(PYGOBJECT_LIBS) \
 	$(PYTHON_LIBS) \
 	@LDFLAGS@
 
@@ -34,7 +34,7 @@ module_LTLIBRARIES = libgtkparasite.la
 INCLUDES = \
 	$(GTK_CFLAGS) \
 	$(PYTHON_CFLAGS) \
-	$(PYGTK_CFLAGS) \
+	$(PYGOBJECT_CFLAGS) \
 	-DPYTHON_SHARED_LIB="\"$(PYTHON_SHARED_LIB)\""
 
 if HAVE_X11
