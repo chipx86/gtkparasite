@@ -27,7 +27,6 @@
 #ifdef ENABLE_PYTHON
 #include <Python.h>
 #include <pygobject.h>
-#include <pygtk/pygtk.h>
 #endif // ENABLE_PYTHON
 
 #include <signal.h>
@@ -113,6 +112,7 @@ parasite_python_init(void)
 #ifdef ENABLE_PYTHON
     int res;
     struct sigaction old_sigint;
+    PyObject *pygobject;
     PyObject *pygtk;
 
     if (is_blacklisted())
@@ -150,35 +150,17 @@ parasite_python_init(void)
         "        parasite.capture_stderr(str)\n"
         "\n"
     );
+    PyRun_SimpleString("sys.argv = []");
 
     if (!pygobject_init(-1, -1, -1))
         return;
+    pygobject = PyImport_ImportModule("gi._gobject");
+    PyImport_ImportModule("gi.repository");
+    pygtk = PyImport_ImportModule("gi.repository.Gtk");
 
-    pygtk = PyImport_ImportModule("gtk");
-
-    if (pygtk != NULL)
-    {
-        PyObject *module_dict = PyModule_GetDict(pygtk);
-        PyObject *cobject = PyDict_GetItemString(module_dict, "_PyGtk_API");
-
-        /*
-         * This seems to be NULL when we're running a PyGTK program.
-         * We really need to find out why.
-         */
-        if (cobject != NULL)
-        {
-            if (PyCObject_Check(cobject))
-                _PyGtk_API = (struct _PyGtk_FunctionStruct*)
-                PyCObject_AsVoidPtr(cobject);
-            else {
-                PyErr_SetString(PyExc_RuntimeError,
-                                "could not find _PyGtk_API object");
-                return;
-            }
-        }
-    } else {
-        PyErr_SetString(PyExc_ImportError, "could not import gtk");
-        return;
+    if (pygobject == NULL) {
+      PyErr_SetString(PyExc_ImportError, "could not import gtk");
+      return;
     }
 
     python_enabled = TRUE;
