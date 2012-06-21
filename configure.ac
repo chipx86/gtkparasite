@@ -1,6 +1,16 @@
-AC_INIT(gtkparasite, 0.1.0, chipx86@chipx86.com)
-AC_PREREQ(2.50)
-AC_CONFIG_SRCDIR(config.h.in)
+AC_INIT([gtkparasite],
+        [0.1.0],
+        [chipx86@chipx86.com],
+        [gtkparasite])
+AC_PREREQ([2.63])
+
+dnl ################################################################
+dnl # Specify a header configuration file
+dnl ################################################################
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_SRCDIR([configure.ac])
+AC_CONFIG_MACRO_DIR([m4])
+
 AC_COPYRIGHT([Copyright 2008-2009 Christian Hammond])
 
 dnl ################################################################
@@ -26,17 +36,9 @@ AC_SUBST(LT_AGE)
 dnl ################################################################
 dnl # Initialize automake
 dnl ################################################################
-VERSION=0.1.0
-PACKAGE=gtkparasite
+AM_INIT_AUTOMAKE([1.11 tar-pax no-dist-gzip dist-xz])
 
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
-
-
-dnl ################################################################
-dnl # Specify a header configuration file
-dnl ################################################################
-AM_CONFIG_HEADER(config.h)
-
+AM_SILENT_RULES([yes])
 
 dnl ################################################################
 dnl # Check for some standard stuff.
@@ -45,11 +47,17 @@ AC_PROG_CPP
 AC_PROG_MAKE_SET
 AC_PROG_LN_S
 AC_PROG_INSTALL
-AM_PROG_LIBTOOL
 
 AC_C_CONST
 AC_TYPE_SIZE_T
 AC_EXEEXT
+
+dnl ################################################################
+dnl # Initialize libtool
+dnl ################################################################
+LT_PREREQ([2.2])
+LT_INIT
+
 
 PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
 AC_SUBST(GTK_CFLAGS)
