@@ -71,8 +71,8 @@ static GtkCellEditable *parasite_property_cell_renderer_start_editing(
     GdkEvent *event,
     GtkWidget *widget,
     const gchar *path,
-    GdkRectangle *background_area,
-    GdkRectangle *cell_area,
+    const GdkRectangle *background_area,
+    const GdkRectangle *cell_area,
     GtkCellRendererState flags);
 
 static void parasite_property_cell_renderer_stop_editing(
@@ -203,8 +203,8 @@ parasite_property_cell_renderer_start_editing(GtkCellRenderer *renderer,
                                               GdkEvent *event,
                                               GtkWidget *widget,
                                               const gchar *path,
-                                              GdkRectangle *background_area,
-                                              GdkRectangle *cell_area,
+                                              const GdkRectangle *background_area,
+                                              const GdkRectangle *cell_area,
                                               GtkCellRendererState flags)
 {
     PangoFontDescription *font_desc;
@@ -229,15 +229,15 @@ parasite_property_cell_renderer_start_editing(GtkCellRenderer *renderer,
 
     if (G_VALUE_HOLDS_ENUM(&gvalue) || G_VALUE_HOLDS_BOOLEAN(&gvalue))
     {
-        GtkWidget *combobox = gtk_combo_box_new_text();
+        GtkWidget *combobox = gtk_combo_box_text_new();
         gtk_widget_show(combobox);
         g_object_set(G_OBJECT(combobox), "has-frame", FALSE, NULL);
         GList *renderers;
 
         if (G_VALUE_HOLDS_BOOLEAN(&gvalue))
         {
-            gtk_combo_box_append_text(GTK_COMBO_BOX(combobox), "FALSE");
-            gtk_combo_box_append_text(GTK_COMBO_BOX(combobox), "TRUE");
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "FALSE");
+            gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "TRUE");
 
             gtk_combo_box_set_active(GTK_COMBO_BOX(combobox),
                                      g_value_get_boolean(&gvalue) ? 1 : 0);
@@ -252,7 +252,7 @@ parasite_property_cell_renderer_start_editing(GtkCellRenderer *renderer,
             {
                 GEnumValue *enum_value = &enum_class->values[i];
 
-                gtk_combo_box_append_text(GTK_COMBO_BOX(combobox),
+                gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox),
                                           enum_value->value_name);
 
                 if (enum_value->value == value)
@@ -386,7 +386,10 @@ parasite_property_cell_renderer_stop_editing(GtkCellEditable *editable,
 
     if (GTK_IS_ENTRY(editable))
     {
-        gboolean canceled = GTK_ENTRY(editable)->editing_canceled;
+        gboolean canceled ;
+        g_object_get (editable,
+                "editing-canceled", &canceled,
+                NULL);
         gtk_cell_renderer_stop_editing(renderer, canceled);
 
         if (canceled)
@@ -433,7 +436,7 @@ parasite_property_cell_renderer_stop_editing(GtkCellEditable *editable,
         else if (G_IS_PARAM_SPEC_ENUM(prop))
         {
             char *enum_name =
-                gtk_combo_box_get_active_text(GTK_COMBO_BOX(editable));
+                gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(editable));
             GEnumClass *enum_class;
             GEnumValue *enum_value;
 

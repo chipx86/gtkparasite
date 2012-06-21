@@ -51,11 +51,11 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_EXEEXT
 
-PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
+PKG_CHECK_MODULES(GTK, [gtk+-3.0 >= 3.0.0])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
-GDK_BACKEND=`pkg-config --variable=target gtk+-2.0`
+GDK_BACKEND=`pkg-config --variable=targets gtk+-3.0`
 AM_CONDITIONAL(HAVE_X11, [test x"$GDK_BACKEND" = x"x11"])
 
 AM_PATH_PYTHON([2.4], [
@@ -79,21 +79,21 @@ AM_PATH_PYTHON([2.4], [
     fi
     AC_SUBST(PYTHON_SHARED_LIB)
 
-    PKG_CHECK_MODULES(PYGTK,
-                      [pygtk-2.0 >= 2.10.3],
+    PKG_CHECK_MODULES(PYGOBJECT,
+                      [pygobject-3.0 >= 2.90.3],
                       [
-                        has_pygtk=yes
+                        has_pygobject=yes
                         AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
                       ],
-                      [has_pygtk=no])
+                      [has_pygobject=no])
 ], [has_python=no])
 
-AM_CONDITIONAL(ENABLE_PYTHON, [test x"$has_pygtk" = x"yes"])
+AM_CONDITIONAL(ENABLE_PYTHON, [test x"$has_pygobject" = x"yes"])
 
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_LIBS)
-AC_SUBST(PYGTK_CFLAGS)
-AC_SUBST(PYGTK_LIBS)
+AC_SUBST(PYGOBJECT_CFLAGS)
+AC_SUBST(PYGOBJECT_LIBS)
 
 
 dnl # Use wall if we have GCC
