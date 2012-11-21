@@ -1,7 +1,7 @@
-AC_INIT(gtkparasite, 0.1.0, chipx86@chipx86.com)
+AC_INIT(gtkparasite, 0.2.0, chipx86@chipx86.com)
 AC_PREREQ(2.50)
 AC_CONFIG_SRCDIR(config.h.in)
-AC_COPYRIGHT([Copyright 2008-2009 Christian Hammond])
+AC_COPYRIGHT([Copyright 2008-2012 Christian Hammond])
 
 dnl ################################################################
 dnl # libtool versioning
@@ -26,7 +26,7 @@ AC_SUBST(LT_AGE)
 dnl ################################################################
 dnl # Initialize automake
 dnl ################################################################
-VERSION=0.1.0
+VERSION=0.2.0
 PACKAGE=gtkparasite
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
