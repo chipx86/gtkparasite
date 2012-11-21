@@ -352,6 +352,13 @@ parasite_widget_tree_get_selected_widget(ParasiteWidgetTree *widget_tree)
     return NULL;
 }
 
+static void
+on_container_forall(GtkWidget *widget, gpointer data)
+{
+    GList **list = (GList **)data;
+
+    *list = g_list_append(*list, widget);
+}
 
 static void
 append_widget(GtkTreeStore *model,
@@ -436,12 +443,18 @@ append_widget(GtkTreeStore *model,
 
     if (GTK_IS_CONTAINER(widget))
     {
-        for (l = gtk_container_get_children(GTK_CONTAINER(widget));
-             l != NULL;
-             l = l->next)
+        GList* children = NULL;
+
+        /* Pick up all children, including those that are internal. */
+        gtk_container_forall(GTK_CONTAINER(widget),
+                             on_container_forall, &children);
+
+        for (l = children; l != NULL; l = l->next)
         {
             append_widget(model, GTK_WIDGET(l->data), &iter);
         }
+
+        g_list_free(children);
     }
 }
 
