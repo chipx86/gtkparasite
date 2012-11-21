@@ -361,7 +361,7 @@ append_widget(GtkTreeStore *model,
     GtkTreeIter iter;
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
     const char *name;
-    const char *row_color;
+    char *row_color = NULL;
     char *window_info;
     char *address;
     gboolean realized;
@@ -409,7 +409,13 @@ append_widget(GtkTreeStore *model,
     mapped = gtk_widget_get_mapped(widget);
     visible = gtk_widget_get_visible(widget);
 
-    row_color = (realized && mapped && visible) ? "black" : "grey";
+    if (!realized || !mapped || !visible)
+    {
+        GtkStyle* style = gtk_widget_get_style(GTK_WIDGET(widget));
+        GdkColor color = style->fg[GTK_STATE_INSENSITIVE];
+
+        row_color = gdk_color_to_string(&color);
+    }
 
     gtk_tree_store_append(model, &iter, parent_iter);
     gtk_tree_store_set(model, &iter,
@@ -426,6 +432,7 @@ append_widget(GtkTreeStore *model,
 
     g_free(window_info);
     g_free(address);
+    g_free(row_color);
 
     if (GTK_IS_CONTAINER(widget))
     {
