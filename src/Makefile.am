@@ -19,7 +19,7 @@ libgtkparasite_la_SOURCES = \
 	window.c
 
 libgtkparasite_la_LDFLAGS = \
-	-rpath $(moduledir) -module -avoid-version \
+	-rpath $(moduledir) -module -avoid-version -no-undefined \
 	$(GTK_LIBS) \
 	$(PYGTK_LIBS) \
 	$(PYTHON_LIBS) \
