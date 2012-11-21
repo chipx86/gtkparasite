@@ -79,7 +79,7 @@ GDK_BACKEND=`pkg-config --variable=target gtk+-$GTK_API_VERSION`
 AM_CONDITIONAL(HAVE_X11, [test x"$GDK_BACKEND" = x"x11"])
 
 AM_PATH_PYTHON([2.4], [
-    AC_PATH_PROG(PYTHON_CONFIG, python2.7-config)
+    AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
     if test x"$PYTHON_CONFIG" == x""; then
         AC_PATH_PROG(PYTHON_CONFIG, python-config)
     fi
@@ -93,9 +93,9 @@ AM_PATH_PYTHON([2.4], [
 
     # Kind of a hacky way to get this, but that's alright..
     if test x"$GDK_BACKEND" == x"quartz"; then
-        PYTHON_SHARED_LIB="libpython2.7.dylib"
+        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.dylib"
     else
-        PYTHON_SHARED_LIB="libpython2.7.so"
+        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so"
     fi
     AC_SUBST(PYTHON_SHARED_LIB)
 
@@ -149,6 +149,9 @@ AC_OUTPUT
 
 echo
 echo $PACKAGE v$VERSION
+echo
+echo "GTK+ version:   $GTK_API_VERSION"
+echo "Python support: $has_pygtk"
 
 echo
 echo "Now type make to compile"

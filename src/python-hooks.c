@@ -25,11 +25,11 @@
 #include "config.h"
 
 #ifdef ENABLE_PYTHON
-#include <Python.h>
-#include <pygobject.h>
-#ifndef USE_GOBJECT_INTROSPECTION
-#include <pygtk/pygtk.h>
-#endif // USE_GOBJECT_INTROSPECTION
+# include <Python.h>
+# include <pygobject.h>
+# ifndef USE_GOBJECT_INTROSPECTION
+#  include <pygtk/pygtk.h>
+# endif // USE_GOBJECT_INTROSPECTION
 #endif // ENABLE_PYTHON
 
 #include <signal.h>
@@ -115,7 +115,6 @@ parasite_python_init(void)
 #ifdef ENABLE_PYTHON
     int res;
     struct sigaction old_sigint;
-    PyObject *pygtk;
 
     if (is_blacklisted())
         return;
@@ -155,18 +154,23 @@ parasite_python_init(void)
 
     if (!pygobject_init(-1, -1, -1))
     {
+        fprintf(stderr, "Error initializing pygobject support.\n");
         PyErr_Print();
         return;
     }
+
 #ifdef USE_GOBJECT_INTROSPECTION
     //pygtk = PyImport_ImportModule("gtk");
     wchar_t *argv[] = { L"", NULL };
     PySys_SetArgv(0, argv);
 #else
     init_pygtk();
-    if(PyErr_Occurred())
+
+    if (PyErr_Occurred())
     {
-    	return;
+        fprintf(stderr, "Error initializing pygtk support.\n");
+        PyErr_Print();
+        return;
     }
 #endif // USE_GOBJECT_INTROSPECTION
 
