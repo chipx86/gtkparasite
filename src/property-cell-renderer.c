@@ -24,6 +24,14 @@
 #include "property-cell-renderer.h"
 
 
+#if GTK_CHECK_VERSION (3,0,0)
+    #define gtk_combo_box_append_text gtk_combo_box_text_append_text
+    #define gtk_combo_box_new_text gtk_combo_box_text_new
+    #define gtk_combo_box_get_active_text gtk_combo_box_text_get_active_text
+    #define GTK_COMBO_BOX GTK_COMBO_BOX_TEXT
+    #define GtkComboBox GtkComboBoxText
+#endif
+
 #define PARASITE_PROPERTY_CELL_RENDERER_GET_PRIVATE(obj) \
     (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_PROPERTY_CELL_RENDERER, \
                                  ParasitePropertyCellRendererPrivate))
@@ -386,7 +394,8 @@ parasite_property_cell_renderer_stop_editing(GtkCellEditable *editable,
 
     if (GTK_IS_ENTRY(editable))
     {
-        gboolean canceled = GTK_ENTRY(editable)->editing_canceled;
+        gboolean canceled;
+        g_object_get(editable, "editing_canceled", &canceled, NULL);
         gtk_cell_renderer_stop_editing(renderer, canceled);
 
         if (canceled)

@@ -335,18 +335,18 @@ parasite_python_shell_key_press_cb(GtkWidget *textview,
                                    GdkEventKey *event,
                                    GtkWidget *python_shell)
 {
-    if (event->keyval == GDK_Return)
+    if (event->keyval == GDK_KEY_Return)
     {
         parasite_python_shell_process_line(python_shell);
         return TRUE;
     }
-    else if (event->keyval == GDK_Up)
+    else if (event->keyval == GDK_KEY_Up)
     {
         parasite_python_shell_replace_input(python_shell,
             parasite_python_shell_get_history_back(python_shell));
         return TRUE;
     }
-    else if (event->keyval == GDK_Down)
+    else if (event->keyval == GDK_KEY_Down)
     {
         parasite_python_shell_replace_input(python_shell,
             parasite_python_shell_get_history_forward(python_shell));
@@ -380,8 +380,8 @@ parasite_python_shell_key_press_cb(GtkWidget *textview,
                                                   &selection_iter);
 
         if (cmp_start_insert == 0 && cmp_start_select == 0 &&
-            (event->keyval == GDK_BackSpace ||
-             event->keyval == GDK_Left))
+            (event->keyval == GDK_KEY_BackSpace ||
+             event->keyval == GDK_KEY_Left))
         {
             return TRUE;
         }

@@ -1,4 +1,4 @@
-moduledir = $(libdir)/gtk-2.0/modules
+moduledir = $(libdir)/gtk-$(GTK_API_VERSION)/modules
 
 libgtkparasite_la_SOURCES = \
 	action-list.c \

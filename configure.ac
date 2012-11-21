@@ -51,15 +51,34 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_EXEEXT
 
-PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.12.0])
+AC_MSG_CHECKING([which gtk+ version to compile against])
+AC_ARG_WITH([gtk],
+    [AS_HELP_STRING([--with-gtk=2.0|3.0],[which gtk+ version to compile against (default: 2.0)])],
+    [case "$with_gtk" in
+        2.0|3.0) GTK_API_VERSION=$with_gtk ;;
+        *) AC_MSG_ERROR([invalid gtk version specified]) ;;
+        esac],
+    [GTK_API_VERSION=2.0])
+AC_MSG_RESULT([$GTK_API_VERSION])
+AC_SUBST(GTK_API_VERSION)
+
+case "$GTK_API_VERSION" in
+3.0)
+	GTK_REQUIRED=3.0.0
+    ;;
+2.0)
+	GTK_REQUIRED=2.0.0
+    ;;
+esac
+PKG_CHECK_MODULES(GTK, [gtk+-$GTK_API_VERSION >= $GTK_REQUIRED])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
-GDK_BACKEND=`pkg-config --variable=target gtk+-2.0`
+GDK_BACKEND=`pkg-config --variable=target gtk+-$GTK_API_VERSION`
 AM_CONDITIONAL(HAVE_X11, [test x"$GDK_BACKEND" = x"x11"])
 
 AM_PATH_PYTHON([2.4], [
-    AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
+    AC_PATH_PROG(PYTHON_CONFIG, python2.7-config)
     if test x"$PYTHON_CONFIG" == x""; then
         AC_PATH_PROG(PYTHON_CONFIG, python-config)
     fi
@@ -73,19 +92,33 @@ AM_PATH_PYTHON([2.4], [
 
     # Kind of a hacky way to get this, but that's alright..
     if test x"$GDK_BACKEND" == x"quartz"; then
-        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.dylib"
+        PYTHON_SHARED_LIB="libpython2.7.dylib"
     else
-        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so"
+        PYTHON_SHARED_LIB="libpython2.7.so"
     fi
     AC_SUBST(PYTHON_SHARED_LIB)
 
-    PKG_CHECK_MODULES(PYGTK,
-                      [pygtk-2.0 >= 2.10.3],
-                      [
-                        has_pygtk=yes
-                        AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
-                      ],
-                      [has_pygtk=no])
+    case "$GTK_API_VERSION" in
+    3.0)
+        PKG_CHECK_MODULES(PYGTK,
+                          [pygobject-3.0 >= 3.0.0],
+                          [
+                            has_pygtk=yes
+                            AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
+                            AC_DEFINE(USE_GOBJECT_INTROSPECTION, [1], [Use GIR support for GTK+3])
+                          ],
+                          [has_pygtk=no])
+    ;;
+    2.0)
+        PKG_CHECK_MODULES(PYGTK,
+                          [pygobject-2.0 >= 2.0.0],
+                          [
+                            has_pygtk=yes
+                            AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
+                          ],
+                          [has_pygtk=no])
+    ;;
+    esac
 ], [has_python=no])
 
 AM_CONDITIONAL(ENABLE_PYTHON, [test x"$has_pygtk" = x"yes"])

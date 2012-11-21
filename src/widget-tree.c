@@ -389,7 +389,7 @@ append_widget(GtkTreeStore *model,
         }
     }
 
-    if (widget->window)
+    if (gtk_widget_get_window(widget))
     {
 #if HAVE_X11
 	window_info = g_strdup_printf("%p (XID 0x%x)", widget->window,
@@ -405,9 +405,9 @@ append_widget(GtkTreeStore *model,
 
     address = g_strdup_printf("%p", widget);
 
-    realized = GTK_WIDGET_REALIZED(widget);
-    mapped = GTK_WIDGET_MAPPED(widget);
-    visible = GTK_WIDGET_VISIBLE(widget);
+    realized = gtk_widget_get_realized(widget);
+    mapped = gtk_widget_get_mapped(widget);
+    visible = gtk_widget_get_visible(widget);
 
     row_color = (realized && mapped && visible) ? "black" : "grey";
 

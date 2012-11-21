@@ -119,7 +119,7 @@ on_highlight_widget(GtkWidget *grab_window,
         return;
     }
 
-    if (gdk_window_get_toplevel(selected_window) == parasite->window->window)
+    if (gdk_window_get_toplevel(selected_window) == gtk_widget_get_window(parasite->window))
     {
        /* Don't hilight things in the parasite window */
         parasite->selected_window = NULL;
@@ -129,7 +129,9 @@ on_highlight_widget(GtkWidget *grab_window,
     parasite->selected_window = selected_window;
 
     gdk_window_get_origin(selected_window, &x, &y);
-    gdk_drawable_get_size(GDK_DRAWABLE(selected_window), &width, &height);
+    width=gdk_window_get_width(GDK_WINDOW(selected_window));
+    height=gdk_window_get_height(GDK_WINDOW(selected_window));
+
     gtk_window_move(GTK_WINDOW(parasite->highlight_window), x, y);
     gtk_window_resize(GTK_WINDOW(parasite->highlight_window), width, height);
     gtk_widget_show(parasite->highlight_window);
@@ -165,7 +167,7 @@ on_inspect_button_release(GtkWidget *button,
 
     cursor = gdk_cursor_new_for_display(gtk_widget_get_display(button),
                                         GDK_CROSSHAIR);
-    gdk_pointer_grab(parasite->grab_window->window, FALSE,
+    gdk_pointer_grab(gtk_widget_get_window(parasite->grab_window), FALSE,
                      events,
                      NULL,
                      cursor,
@@ -199,7 +201,7 @@ on_flash_timeout(ParasiteWindow *parasite)
 
     if (parasite->flash_count % 2 == 0)
     {
-        if (GTK_WIDGET_VISIBLE(parasite->highlight_window))
+        if (gtk_widget_get_visible(parasite->highlight_window))
             gtk_widget_hide(parasite->highlight_window);
         else
             gtk_widget_show(parasite->highlight_window);
@@ -214,19 +216,22 @@ gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget)
     gint x, y, width, height;
     GdkWindow *parent_window;
 
-    if (!GTK_WIDGET_VISIBLE(widget) || !GTK_WIDGET_MAPPED(widget))
+    if (!gtk_widget_get_visible(widget) || !gtk_widget_get_mapped(widget))
         return;
 
     ensure_highlight_window(parasite);
 
     parent_window = gtk_widget_get_parent_window(widget);
     if (parent_window != NULL) {
+    	GtkAllocation alloc;
+    	gtk_widget_get_allocation(widget, &alloc);
+    	
         gdk_window_get_origin(parent_window, &x, &y);
-        x += widget->allocation.x;
-        y += widget->allocation.y;
+        x += alloc.x;
+        y += alloc.y;
 
-        width = widget->allocation.width;
-        height = widget->allocation.height;
+        width = alloc.width;
+        height = alloc.height;
 
         gtk_window_move(GTK_WINDOW(parasite->highlight_window), x, y);
         gtk_window_resize(GTK_WINDOW(parasite->highlight_window), width, height);

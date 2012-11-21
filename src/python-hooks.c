@@ -27,7 +27,9 @@
 #ifdef ENABLE_PYTHON
 #include <Python.h>
 #include <pygobject.h>
+#ifndef USE_GOBJECT_INTROSPECTION
 #include <pygtk/pygtk.h>
+#endif // USE_GOBJECT_INTROSPECTION
 #endif // ENABLE_PYTHON
 
 #include <signal.h>
@@ -152,34 +154,21 @@ parasite_python_init(void)
     );
 
     if (!pygobject_init(-1, -1, -1))
-        return;
-
-    pygtk = PyImport_ImportModule("gtk");
-
-    if (pygtk != NULL)
     {
-        PyObject *module_dict = PyModule_GetDict(pygtk);
-        PyObject *cobject = PyDict_GetItemString(module_dict, "_PyGtk_API");
-
-        /*
-         * This seems to be NULL when we're running a PyGTK program.
-         * We really need to find out why.
-         */
-        if (cobject != NULL)
-        {
-            if (PyCObject_Check(cobject))
-                _PyGtk_API = (struct _PyGtk_FunctionStruct*)
-                PyCObject_AsVoidPtr(cobject);
-            else {
-                PyErr_SetString(PyExc_RuntimeError,
-                                "could not find _PyGtk_API object");
-                return;
-            }
-        }
-    } else {
-        PyErr_SetString(PyExc_ImportError, "could not import gtk");
+        PyErr_Print();
         return;
     }
+#ifdef USE_GOBJECT_INTROSPECTION
+    //pygtk = PyImport_ImportModule("gtk");
+    wchar_t *argv[] = { L"", NULL };
+    PySys_SetArgv(0, argv);
+#else
+    init_pygtk();
+    if(PyErr_Occurred())
+    {
+    	return;
+    }
+#endif // USE_GOBJECT_INTROSPECTION
 
     python_enabled = TRUE;
 #endif // ENABLE_PYTHON
