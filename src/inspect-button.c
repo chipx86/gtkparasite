@@ -129,8 +129,13 @@ on_highlight_widget(GtkWidget *grab_window,
     parasite->selected_window = selected_window;
 
     gdk_window_get_origin(selected_window, &x, &y);
-    width=gdk_window_get_width(GDK_WINDOW(selected_window));
-    height=gdk_window_get_height(GDK_WINDOW(selected_window));
+
+#if GTK_CHECK_VERSION(3, 0, 0)
+    width = gdk_window_get_width(GDK_WINDOW(selected_window));
+    height = gdk_window_get_height(GDK_WINDOW(selected_window));
+#else
+    gdk_drawable_get_size(GDK_DRAWABLE(selected_window), &width, &height);
+#endif
 
     gtk_window_move(GTK_WINDOW(parasite->highlight_window), x, y);
     gtk_window_resize(GTK_WINDOW(parasite->highlight_window), width, height);
