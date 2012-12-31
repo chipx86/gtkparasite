@@ -23,6 +23,7 @@
 #include "action-list.h"
 #include "parasite.h"
 #include "prop-list.h"
+#include "class-tree.h"
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
@@ -38,6 +39,8 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
     if (selected != NULL) {
         parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list),
                                      selected);
+	parasite_classtree_set_widget(PARASITE_CLASSTREE(parasite->class_tree),
+				      selected);
 
         /* Flash the widget. */
         gtkparasite_flash_widget(parasite, selected);
@@ -154,10 +157,27 @@ create_prop_list_pane(ParasiteWindow *parasite)
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
                                         GTK_SHADOW_IN);
-    gtk_widget_set_size_request(swin, 250, -1);
 
     parasite->prop_list = parasite_proplist_new();
     gtk_container_add(GTK_CONTAINER(swin), parasite->prop_list);
+
+    return swin;
+}
+
+static GtkWidget *
+create_class_tree_pane(ParasiteWindow *parasite)
+{
+    GtkWidget *swin;
+
+    swin = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
+                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
+                                        GTK_SHADOW_IN);
+
+    parasite->class_tree = parasite_classtree_new();
+    gtk_widget_show(parasite->class_tree);
+    gtk_container_add(GTK_CONTAINER(swin), parasite->class_tree);
 
     return swin;
 }
@@ -175,14 +195,23 @@ create_widget_tree(ParasiteWindow *parasite)
 {
     GtkWidget *swin;
     GtkWidget *hpaned;
+    GtkWidget *notebook;
 
     hpaned = gtk_hpaned_new();
 
     swin = create_widget_list_pane(parasite);
     gtk_paned_pack1(GTK_PANED(hpaned), swin, TRUE, TRUE);
 
-    swin = create_prop_list_pane(parasite);
-    gtk_paned_pack2(GTK_PANED(hpaned), swin, FALSE, TRUE);
+    notebook = gtk_notebook_new();
+    gtk_paned_pack2(GTK_PANED(hpaned), notebook, FALSE, TRUE);
+    gtk_widget_set_size_request(notebook, 250, -1);
+
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			     create_prop_list_pane(parasite),
+			     gtk_label_new("Properties"));
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			     create_class_tree_pane(parasite),
+			     gtk_label_new("Classes"));
 
     return hpaned;
 }

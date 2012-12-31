@@ -8,6 +8,8 @@ libgtkparasite_la_SOURCES = \
 	parasite.h \
 	prop-list.h \
 	prop-list.c \
+	class-tree.h \
+	class-tree.c \
 	property-cell-renderer.c \
 	property-cell-renderer.h \
 	python-hooks.c \
