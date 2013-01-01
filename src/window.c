@@ -126,7 +126,6 @@ create_widget_list_pane(ParasiteWindow *parasite)
                                         GTK_SHADOW_IN);
 
     parasite->widget_tree = parasite_widget_tree_new();
-    gtk_widget_show(parasite->widget_tree);
     gtk_container_add(GTK_CONTAINER(swin), parasite->widget_tree);
 
     g_signal_connect(G_OBJECT(parasite->widget_tree),
@@ -158,7 +157,6 @@ create_prop_list_pane(ParasiteWindow *parasite)
     gtk_widget_set_size_request(swin, 250, -1);
 
     parasite->prop_list = parasite_proplist_new();
-    gtk_widget_show(parasite->prop_list);
     gtk_container_add(GTK_CONTAINER(swin), parasite->prop_list);
 
     return swin;
@@ -182,36 +180,29 @@ create_widget_tree(ParasiteWindow *parasite)
     GtkWidget *hpaned;
 
     vbox = gtk_vbox_new(FALSE, 6);
-    gtk_widget_show(vbox);
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
     bbox = gtk_hbutton_box_new();
-    gtk_widget_show(bbox);
     gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 0);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_START);
     gtk_box_set_spacing(GTK_BOX(bbox), 6);
 
     button = gtkparasite_inspect_button_new(parasite);
-    gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
 
     button = gtk_toggle_button_new_with_mnemonic("_Show Graphic Updates");
-    gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
 
     g_signal_connect(G_OBJECT(button), "toggled",
                      G_CALLBACK(on_show_graphic_updates_toggled), parasite);
 
     hpaned = gtk_hpaned_new();
-    gtk_widget_show(hpaned);
     gtk_box_pack_start(GTK_BOX(vbox), hpaned, TRUE, TRUE, 0);
 
     swin = create_widget_list_pane(parasite);
-    gtk_widget_show(swin);
     gtk_paned_pack1(GTK_PANED(hpaned), swin, TRUE, TRUE);
 
     swin = create_prop_list_pane(parasite);
-    gtk_widget_show(swin);
     gtk_paned_pack2(GTK_PANED(hpaned), swin, FALSE, TRUE);
 
     return vbox;
@@ -224,11 +215,9 @@ create_action_list(ParasiteWindow *parasite)
     GtkWidget *swin;
 
     vbox = gtk_vbox_new(FALSE, 6);
-    gtk_widget_show(vbox);
     gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
     swin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_show(swin);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_ALWAYS);
@@ -237,7 +226,6 @@ create_action_list(ParasiteWindow *parasite)
     gtk_box_pack_start(GTK_BOX(vbox), swin, TRUE, TRUE, 0);
 
     parasite->action_list = parasite_actionlist_new(parasite);
-    gtk_widget_show(parasite->action_list);
     gtk_container_add(GTK_CONTAINER(swin), parasite->action_list);
 
     if (parasite_python_is_enabled())
@@ -267,18 +255,15 @@ gtkparasite_window_create()
     window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window->window), 1000, 500);
     gtk_container_set_border_width(GTK_CONTAINER(window->window), 12);
-    gtk_widget_show(window->window);
 
     title = g_strdup_printf("Parasite - %s", g_get_application_name());
     gtk_window_set_title(GTK_WINDOW(window->window), title);
     g_free(title);
 
     vpaned = gtk_vpaned_new();
-    gtk_widget_show(vpaned);
     gtk_container_add(GTK_CONTAINER(window->window), vpaned);
 
     notebook = gtk_notebook_new();
-    gtk_widget_show(notebook);
     gtk_paned_pack1(GTK_PANED(vpaned), notebook, TRUE, FALSE);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
@@ -293,7 +278,6 @@ gtkparasite_window_create()
         GtkWidget *menuitem;
 
         window->python_shell = parasite_python_shell_new();
-        gtk_widget_show(window->python_shell);
         gtk_paned_pack2(GTK_PANED(vpaned), window->python_shell, FALSE, FALSE);
 
         /*
@@ -321,6 +305,8 @@ gtkparasite_window_create()
         g_signal_connect(G_OBJECT(menuitem), "activate",
                          G_CALLBACK(on_send_action_to_shell_activate), window);
     }
+
+    gtk_widget_show_all(window->window);
 }
 
 // vim: set et sw=4 ts=4:
