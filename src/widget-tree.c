@@ -360,6 +360,20 @@ on_container_forall(GtkWidget *widget, gpointer data)
     *list = g_list_append(*list, widget);
 }
 
+static char *
+get_window_info(GtkWidget *widget)
+{
+#if HAVE_X11
+    GdkWindow* window = gtk_widget_get_window(widget);
+    if (window)
+    {
+        return g_strdup_printf("%p (XID 0x%x)", window,
+			       (int)GDK_WINDOW_XID(window));
+    }
+#endif
+    return g_strdup("");
+}
+
 static void
 append_widget(GtkTreeStore *model,
               GtkWidget *widget,
@@ -396,19 +410,7 @@ append_widget(GtkTreeStore *model,
         }
     }
 
-    if (gtk_widget_get_window(widget))
-    {
-#if HAVE_X11
-	window_info = g_strdup_printf("%p (XID 0x%x)", widget->window,
-	                              (int)GDK_WINDOW_XID(widget->window));
-#else
-	window_info = g_strdup("");
-#endif
-    }
-    else
-    {
-        window_info = g_strdup("");
-    }
+    window_info = get_window_info(widget);
 
     address = g_strdup_printf("%p", widget);
 
