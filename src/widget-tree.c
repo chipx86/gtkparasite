@@ -51,11 +51,17 @@ enum
     LAST_SIGNAL
 };
 
+struct ColumnState
+{
+    GtkCellRenderer *renderer;
+    guint editable :1;
+};
 
 struct _ParasiteWidgetTreePrivate
 {
     GtkTreeStore *model;
-    gboolean edit_mode_enabled;
+
+    struct ColumnState columns[NUM_COLUMNS];
 };
 
 #define PARASITE_WIDGET_TREE_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_WIDGET_TREE, ParasiteWidgetTreePrivate))
@@ -83,9 +89,6 @@ handle_toggle(GtkCellRendererToggle *toggle,
     GtkTreeIter iter;
     GtkWidget *widget;
     gboolean new_active = !gtk_cell_renderer_toggle_get_active(toggle);
-
-    if (!widget_tree->priv->edit_mode_enabled)
-        return;
 
     gtk_tree_model_get_iter(GTK_TREE_MODEL(widget_tree->priv->model),
                             &iter,
@@ -146,13 +149,100 @@ on_toggle_map(GtkCellRendererToggle *toggle,
                   gtk_widget_unmap);
 }
 
+static void
+on_toggle_column_clicked(GtkTreeViewColumn *column, struct ColumnState *state)
+{
+    GtkCellRendererToggle *renderer = GTK_CELL_RENDERER_TOGGLE(state->renderer);
+    state->editable = !state->editable;
+    gtk_cell_renderer_toggle_set_activatable(renderer, state->editable);
+    gtk_tree_view_column_queue_resize(column);
+}
+
+static GtkTreeViewColumn *
+_text_column_init(ParasiteWidgetTree *widget_tree,
+		  GtkCellRenderer *renderer,
+		  const gchar *title, int column_id)
+{
+    GtkTreeViewColumn *column;
+
+    column = gtk_tree_view_column_new_with_attributes(title, renderer,
+                                                      "text", column_id,
+                                                      "foreground", ROW_COLOR,
+                                                      NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
+    gtk_tree_view_column_set_resizable(column, TRUE);
+
+    return column;
+}
+
+static GtkTreeViewColumn *
+text_column_init(ParasiteWidgetTree *widget_tree,
+		 const gchar *title, int column_id)
+{
+    GtkCellRenderer *renderer;
+
+    renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
+    return _text_column_init(widget_tree, renderer, title, column_id);
+}
+
+static GtkTreeViewColumn *
+monospace_text_column_init(ParasiteWidgetTree *widget_tree,
+			   const gchar *title, int column_id)
+{
+    GtkCellRenderer *renderer;
+
+    renderer = gtk_cell_renderer_text_new();
+    g_object_set(G_OBJECT(renderer),
+		 "scale", TREE_TEXT_SCALE,
+		 "family", "monospace", NULL);
+    return _text_column_init(widget_tree, renderer, title, column_id);
+}
+
+static GtkTreeViewColumn *
+toggle_column_init(ParasiteWidgetTree *widget_tree,
+		   const gchar *title, int column_id,
+		   gboolean editable, GCallback on_cell_toggle)
+{
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+#if GTK3
+    GtkWidget *header;
+#endif
+    struct ColumnState *state = &widget_tree->priv->columns[column_id];
+
+    state->editable = editable;
+    state->renderer = renderer = gtk_cell_renderer_toggle_new();
+    g_object_set(G_OBJECT(renderer),
+                 "activatable", editable,
+                 "indicator-size", TREE_CHECKBOX_SIZE,
+                 NULL);
+    column = gtk_tree_view_column_new_with_attributes(title,
+                                                      renderer,
+                                                      "active", column_id,
+                                                      NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
+    if (on_cell_toggle != NULL) {
+	g_signal_connect(G_OBJECT(renderer), "toggled",
+			 G_CALLBACK(on_cell_toggle), widget_tree);
+    }
+
+    gtk_tree_view_column_set_clickable(column, TRUE);
+    g_signal_connect(G_OBJECT(column), "clicked",
+		     G_CALLBACK(on_toggle_column_clicked), state);
+
+#if GTK3
+    header = gtk_tree_view_column_get_button(column);
+    gtk_button_set_focus_on_click(GTK_BUTTON(header), FALSE);
+#endif
+
+    return column;
+}
 
 static void
 parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
                           ParasiteWidgetTreeClass *klass)
 {
-    GtkCellRenderer *renderer;
-    GtkTreeViewColumn *column;
     GtkTreeSelection *selection;
 
     widget_tree->priv = PARASITE_WIDGET_TREE_GET_PRIVATE(widget_tree);
@@ -169,8 +259,6 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
         G_TYPE_STRING,  // WIDGET_ADDRESS
         G_TYPE_STRING); // ROW_COLOR
 
-    widget_tree->priv->edit_mode_enabled = FALSE;
-
     gtk_tree_view_set_model(GTK_TREE_VIEW(widget_tree),
                             GTK_TREE_MODEL(widget_tree->priv->model));
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(widget_tree), TRUE);
@@ -181,96 +269,15 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
                      G_CALLBACK(parasite_widget_tree_on_widget_selected),
                      widget_tree);
 
-    // Widget column
-    renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
-    column = gtk_tree_view_column_new_with_attributes("Widget", renderer,
-                                                      "text", WIDGET_TYPE,
-                                                      "foreground", ROW_COLOR,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    gtk_tree_view_column_set_resizable(column, TRUE);
-
-    // Name column
-    renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
-    column = gtk_tree_view_column_new_with_attributes("Name", renderer,
-                                                      "text", WIDGET_NAME,
-                                                      "foreground", ROW_COLOR,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    gtk_tree_view_column_set_resizable(column, TRUE);
-
-    // Realized column
-    renderer = gtk_cell_renderer_toggle_new();
-    g_object_set(G_OBJECT(renderer),
-                 "activatable", TRUE,
-                 "indicator-size", TREE_CHECKBOX_SIZE,
-                 NULL);
-    column = gtk_tree_view_column_new_with_attributes("Realized",
-                                                      renderer,
-                                                      "active", WIDGET_REALIZED,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    gtk_tree_view_column_set_clickable(column, TRUE);
-    g_signal_connect(G_OBJECT(renderer), "toggled",
-                     G_CALLBACK(on_toggle_realize), widget_tree);
-
-    // Mapped column
-    renderer = gtk_cell_renderer_toggle_new();
-    g_object_set(G_OBJECT(renderer),
-                 "activatable", FALSE,
-                 "indicator-size", TREE_CHECKBOX_SIZE,
-                 NULL);
-    column = gtk_tree_view_column_new_with_attributes("Mapped",
-                                                      renderer,
-                                                      "active", WIDGET_MAPPED,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    //g_signal_connect(G_OBJECT(renderer), "toggled",
-    //                 G_CALLBACK(on_toggle_map), widget_tree);
-
-    // Visible column
-    renderer = gtk_cell_renderer_toggle_new();
-    g_object_set(G_OBJECT(renderer),
-                 "activatable", FALSE,
-                 "indicator-size", TREE_CHECKBOX_SIZE,
-                 NULL);
-    column = gtk_tree_view_column_new_with_attributes("Visible",
-                                                      renderer,
-                                                      "active", WIDGET_VISIBLE,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    //g_signal_connect(G_OBJECT(renderer), "toggled",
-    //                 G_CALLBACK(on_toggle_visible), widget_tree);
-
-    // X Window column
-    renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer),
-                 "scale", TREE_TEXT_SCALE,
-                 "family", "monospace",
-                 NULL);
-    column = gtk_tree_view_column_new_with_attributes("X Window",
-                                                      renderer,
-                                                      "text", WIDGET_WINDOW,
-                                                      "foreground", ROW_COLOR,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    gtk_tree_view_column_set_resizable(column, TRUE);
-
-    // Poinder Address column
-    renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer),
-                 "scale", TREE_TEXT_SCALE,
-                 "family", "monospace",
-                 NULL);
-    column = gtk_tree_view_column_new_with_attributes("Pointer Address",
-                                                      renderer,
-                                                      "text", WIDGET_ADDRESS,
-                                                      "foreground", ROW_COLOR,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    gtk_tree_view_column_set_resizable(column, TRUE);
+    // Columns
+    text_column_init(widget_tree, "Widget", WIDGET_TYPE);
+    text_column_init(widget_tree, "Name", WIDGET_NAME);
+    toggle_column_init(widget_tree, "Realized", WIDGET_REALIZED, TRUE,
+		       G_CALLBACK(on_toggle_realize));
+    toggle_column_init(widget_tree, "Mapped", WIDGET_MAPPED, FALSE, NULL);
+    toggle_column_init(widget_tree, "Visible", WIDGET_VISIBLE, FALSE, NULL);
+    monospace_text_column_init(widget_tree, "X Window", WIDGET_WINDOW);
+    monospace_text_column_init(widget_tree, "Address", WIDGET_ADDRESS);
 }
 
 
@@ -468,15 +475,6 @@ parasite_widget_tree_scan(ParasiteWidgetTree *widget_tree,
     append_widget(widget_tree->priv->model, window, NULL);
     gtk_tree_view_columns_autosize(GTK_TREE_VIEW(widget_tree));
 }
-
-
-void
-parasite_widget_tree_set_edit_mode(ParasiteWidgetTree *widget_tree,
-                                   gboolean edit)
-{
-    widget_tree->priv->edit_mode_enabled = edit;
-}
-
 
 static GList *
 get_parents(GtkWidget *widget,
