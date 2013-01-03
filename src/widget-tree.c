@@ -212,13 +212,14 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
                                                       "active", WIDGET_REALIZED,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
+    gtk_tree_view_column_set_clickable(column, TRUE);
     g_signal_connect(G_OBJECT(renderer), "toggled",
                      G_CALLBACK(on_toggle_realize), widget_tree);
 
     // Mapped column
     renderer = gtk_cell_renderer_toggle_new();
     g_object_set(G_OBJECT(renderer),
-                 "activatable", TRUE,
+                 "activatable", FALSE,
                  "indicator-size", TREE_CHECKBOX_SIZE,
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("Mapped",
@@ -232,7 +233,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
     // Visible column
     renderer = gtk_cell_renderer_toggle_new();
     g_object_set(G_OBJECT(renderer),
-                 "activatable", TRUE,
+                 "activatable", FALSE,
                  "indicator-size", TREE_CHECKBOX_SIZE,
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("Visible",
