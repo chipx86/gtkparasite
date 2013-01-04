@@ -167,37 +167,16 @@ on_show_graphic_updates_toggled(GtkWidget *toggle_button,
                                 ParasiteWindow *parasite)
 {
     gdk_window_set_debug_updates(
-        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button)));
+        gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(toggle_button)));
 }
 
 static GtkWidget *
 create_widget_tree(ParasiteWindow *parasite)
 {
-    GtkWidget *vbox;
-    GtkWidget *bbox;
-    GtkWidget *button;
     GtkWidget *swin;
     GtkWidget *hpaned;
 
-    vbox = gtk_vbox_new(FALSE, 6);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
-
-    bbox = gtk_hbutton_box_new();
-    gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 0);
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_START);
-    gtk_box_set_spacing(GTK_BOX(bbox), 6);
-
-    button = gtkparasite_inspect_button_new(parasite);
-    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
-
-    button = gtk_toggle_button_new_with_mnemonic("_Show Graphic Updates");
-    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
-
-    g_signal_connect(G_OBJECT(button), "toggled",
-                     G_CALLBACK(on_show_graphic_updates_toggled), parasite);
-
     hpaned = gtk_hpaned_new();
-    gtk_box_pack_start(GTK_BOX(vbox), hpaned, TRUE, TRUE, 0);
 
     swin = create_widget_list_pane(parasite);
     gtk_paned_pack1(GTK_PANED(hpaned), swin, TRUE, TRUE);
@@ -205,7 +184,7 @@ create_widget_tree(ParasiteWindow *parasite)
     swin = create_prop_list_pane(parasite);
     gtk_paned_pack2(GTK_PANED(hpaned), swin, FALSE, TRUE);
 
-    return vbox;
+    return hpaned;
 }
 
 static GtkWidget *
@@ -215,7 +194,6 @@ create_action_list(ParasiteWindow *parasite)
     GtkWidget *swin;
 
     vbox = gtk_vbox_new(FALSE, 6);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
     swin = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
@@ -239,10 +217,39 @@ create_action_list(ParasiteWindow *parasite)
     return vbox;
 }
 
+static GtkWidget *
+create_toolbar(ParasiteWindow *parasite)
+{
+    GtkToolbar *toolbar;
+    GtkToolItem *inspect, *updates;
+    GtkWidget *button;
+
+    toolbar = GTK_TOOLBAR(gtk_toolbar_new());
+    gtk_toolbar_set_icon_size(toolbar, GTK_ICON_SIZE_SMALL_TOOLBAR);
+    gtk_toolbar_set_style(toolbar, GTK_TOOLBAR_ICONS);
+
+    inspect = gtk_tool_button_new_from_stock(GTK_STOCK_FIND);
+    gtk_tool_item_set_tooltip_text(inspect, "Inspect");
+    gtk_toolbar_insert(toolbar, inspect, -1);
+
+    button = gtk_bin_get_child(GTK_BIN(inspect));
+    gtkparasite_inspect_button_connect(parasite, button);
+
+    updates = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_REFRESH);
+    gtk_tool_item_set_tooltip_text(updates, "Show Graphic Updates");
+    gtk_toolbar_insert(toolbar, updates, -1);
+    g_signal_connect(G_OBJECT(updates), "toggled",
+                     G_CALLBACK(on_show_graphic_updates_toggled), parasite);
+
+    return GTK_WIDGET(toolbar);
+}
+
 void
 gtkparasite_window_create()
 {
     ParasiteWindow *window;
+    GtkWidget *vbox;
+    GtkWidget *toolbar;
     GtkWidget *vpaned;
     GtkWidget *notebook;
     char *title;
@@ -254,14 +261,20 @@ gtkparasite_window_create()
      */
     window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window->window), 1000, 500);
-    gtk_container_set_border_width(GTK_CONTAINER(window->window), 12);
 
     title = g_strdup_printf("Parasite - %s", g_get_application_name());
     gtk_window_set_title(GTK_WINDOW(window->window), title);
     g_free(title);
 
+    vbox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(window->window), vbox);
+
+    toolbar = create_toolbar(window);
+    gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 0);
+
     vpaned = gtk_vpaned_new();
-    gtk_container_add(GTK_CONTAINER(window->window), vpaned);
+    gtk_container_set_border_width(GTK_CONTAINER(vpaned), 6);
+    gtk_box_pack_start(GTK_BOX(vbox), vpaned, TRUE, TRUE, 0);
 
     notebook = gtk_notebook_new();
     gtk_paned_pack1(GTK_PANED(vpaned), notebook, TRUE, FALSE);

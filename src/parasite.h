@@ -59,7 +59,7 @@ void gtkparasite_window_create();
 
 void gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget);
 
-GtkWidget *gtkparasite_inspect_button_new(ParasiteWindow *parasite);
+void gtkparasite_inspect_button_connect(ParasiteWindow *parasite, GtkWidget *button);
 
 
 #endif // _GTKPARASITE_H_

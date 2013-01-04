@@ -181,16 +181,11 @@ on_inspect_button_release(GtkWidget *button,
 }
 
 
-GtkWidget *
-gtkparasite_inspect_button_new(ParasiteWindow *parasite)
+void
+gtkparasite_inspect_button_connect(ParasiteWindow *parasite, GtkWidget *button)
 {
-    GtkWidget *button;
-
-    button = gtk_button_new_with_label("Inspect");
     g_signal_connect(G_OBJECT(button), "button_release_event",
                      G_CALLBACK(on_inspect_button_release), parasite);
-
-    return button;
 }
 
 static gboolean
