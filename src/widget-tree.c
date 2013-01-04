@@ -54,12 +54,18 @@ enum
 struct ColumnState
 {
     GtkCellRenderer *renderer;
+#if GTK3
+    GtkCheckMenuItem *menuitem;
+#endif
     guint editable :1;
 };
 
 struct _ParasiteWidgetTreePrivate
 {
     GtkTreeStore *model;
+#if GTK3
+    GtkMenu *menu;
+#endif
 
     struct ColumnState columns[NUM_COLUMNS];
 };
@@ -149,6 +155,67 @@ on_toggle_map(GtkCellRendererToggle *toggle,
                   gtk_widget_unmap);
 }
 
+#if GTK3
+
+static gboolean
+on_header_button_press(GtkButton *header,
+		       GdkEventButton *event,
+		       ParasiteWidgetTree *widget_tree)
+{
+    if (event->button ==3)
+    {
+	gtk_menu_popup(GTK_MENU(widget_tree->priv->menu), NULL, NULL,
+		       NULL, NULL, event->button, event->time);
+	return TRUE;
+    }
+    return FALSE;
+}
+
+static gboolean
+on_header_button3_only(GtkButton *header,
+		       GdkEventButton *event,
+		       ParasiteWidgetTree *widget_tree)
+{
+    if (event->button ==3)
+    {
+	gtk_menu_popup(GTK_MENU(widget_tree->priv->menu), NULL, NULL,
+		       NULL, NULL, event->button, event->time);
+    }
+    return TRUE;
+}
+
+static void
+on_showhide_column(GtkCheckMenuItem *menuitem, GtkTreeViewColumn *column)
+{
+    gtk_tree_view_column_set_visible(column, gtk_check_menu_item_get_active(menuitem));
+}
+
+static void
+column_init_ui(ParasiteWidgetTree *widget_tree, GtkTreeViewColumn *column,
+	       struct ColumnState *state,
+	       const gchar *title, GCallback button_press_cb)
+{
+    GtkCheckMenuItem *menuitem;
+    GtkWidget *header;
+
+    state->menuitem = menuitem =
+	    GTK_CHECK_MENU_ITEM(gtk_check_menu_item_new_with_label(title));
+    gtk_check_menu_item_set_active(menuitem,
+				   gtk_tree_view_column_get_visible(column));
+    gtk_menu_shell_append(GTK_MENU_SHELL(widget_tree->priv->menu),
+			  GTK_WIDGET(menuitem));
+    g_signal_connect(G_OBJECT(menuitem), "toggled",
+		     G_CALLBACK(on_showhide_column), column);
+
+    header = gtk_tree_view_column_get_button(column);
+    gtk_button_set_focus_on_click(GTK_BUTTON(header), FALSE);
+
+    g_signal_connect(G_OBJECT(header), "button-press-event",
+		     button_press_cb, widget_tree);
+}
+
+#endif
+
 static void
 on_toggle_column_clicked(GtkTreeViewColumn *column, struct ColumnState *state)
 {
@@ -164,13 +231,20 @@ _text_column_init(ParasiteWidgetTree *widget_tree,
 		  const gchar *title, int column_id)
 {
     GtkTreeViewColumn *column;
+    struct ColumnState *state = &widget_tree->priv->columns[column_id];
 
     column = gtk_tree_view_column_new_with_attributes(title, renderer,
-                                                      "text", column_id,
-                                                      "foreground", ROW_COLOR,
-                                                      NULL);
+						      "text", column_id,
+						      "foreground", ROW_COLOR,
+						      NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
+
+#if GTK3
+    gtk_tree_view_column_set_clickable(column, TRUE);
+    column_init_ui(widget_tree, column, state, title,
+		   G_CALLBACK(on_header_button3_only));
+#endif
 
     return column;
 }
@@ -206,9 +280,6 @@ toggle_column_init(ParasiteWidgetTree *widget_tree,
 {
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
-#if GTK3
-    GtkWidget *header;
-#endif
     struct ColumnState *state = &widget_tree->priv->columns[column_id];
 
     state->editable = editable;
@@ -232,8 +303,8 @@ toggle_column_init(ParasiteWidgetTree *widget_tree,
 		     G_CALLBACK(on_toggle_column_clicked), state);
 
 #if GTK3
-    header = gtk_tree_view_column_get_button(column);
-    gtk_button_set_focus_on_click(GTK_BUTTON(header), FALSE);
+    column_init_ui(widget_tree, column, state, title,
+		   G_CALLBACK(on_header_button_press));
 #endif
 
     return column;
@@ -269,6 +340,10 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
                      G_CALLBACK(parasite_widget_tree_on_widget_selected),
                      widget_tree);
 
+#if GTK3
+    widget_tree->priv->menu = GTK_MENU(gtk_menu_new());
+#endif
+
     // Columns
     text_column_init(widget_tree, "Widget", WIDGET_TYPE);
     text_column_init(widget_tree, "Name", WIDGET_NAME);
@@ -278,6 +353,13 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
     toggle_column_init(widget_tree, "Visible", WIDGET_VISIBLE, FALSE, NULL);
     monospace_text_column_init(widget_tree, "X Window", WIDGET_WINDOW);
     monospace_text_column_init(widget_tree, "Address", WIDGET_ADDRESS);
+
+#if GTK3
+    /* Don't allow hiding widget column */
+    gtk_widget_set_sensitive(GTK_WIDGET(widget_tree->priv->columns[WIDGET_TYPE].menuitem), FALSE);
+
+    gtk_widget_show_all(GTK_WIDGET(widget_tree->priv->menu));
+#endif
 }
 
 
