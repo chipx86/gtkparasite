@@ -143,7 +143,7 @@ on_highlight_widget(GtkWidget *grab_window,
 }
 
 
-static void
+static gboolean
 on_inspect_button_release(GtkWidget *button,
                           GdkEventButton *event,
                           ParasiteWindow *parasite)
@@ -178,6 +178,7 @@ on_inspect_button_release(GtkWidget *button,
                      cursor,
                      event->time);
     gdk_cursor_unref(cursor);
+    return FALSE;
 }
 
 
