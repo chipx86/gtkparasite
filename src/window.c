@@ -218,6 +218,34 @@ on_show_graphic_updates_toggled(GtkWidget *toggle_button,
         gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(toggle_button)));
 }
 
+void
+set_notebook_frameless_style(GtkWidget *notebook)
+{
+#if GTK3
+    GtkStyleContext *context;
+    GtkCssProvider *provider;
+    gchar *styling;
+    const gchar css[] = ".notebook { padding: 0; border-width: 0; }\n"
+                        ".notebook tab { padding: %dpx %dpx %dpx %dpx; "
+                                       " border-width: %dpx %dpx %dpx %dpx; }\n";
+    GtkBorder padding, border;
+
+    context = gtk_widget_get_style_context(notebook);
+    gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
+    gtk_style_context_get_border(context, GTK_STATE_FLAG_NORMAL, &border);
+    styling = g_strdup_printf(css, padding.top, padding.right,
+			      padding.bottom, padding.left,
+			      border.top, border.right,
+			      border.bottom, border.left);
+    provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(provider, styling, -1, NULL);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    g_free(styling);
+    g_object_unref(G_OBJECT(provider));
+#endif
+}
+
 static GtkWidget *
 create_widget_tree(ParasiteWindow *parasite)
 {
@@ -236,6 +264,7 @@ create_widget_tree(ParasiteWindow *parasite)
     gtk_paned_pack2(GTK_PANED(hpaned), notebook, FALSE, TRUE);
     gtk_widget_set_size_request(notebook, 250, -1);
     gtk_notebook_set_tab_pos(notebook, GTK_POS_RIGHT);
+    set_notebook_frameless_style(notebook);
 
     label = gtk_label_new("Properties");
     gtk_label_set_angle(GTK_LABEL(label), angle);
@@ -351,6 +380,7 @@ gtkparasite_window_create()
 
     notebook = gtk_notebook_new();
     gtk_paned_pack1(GTK_PANED(vpaned), notebook, TRUE, FALSE);
+    set_notebook_frameless_style(notebook);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
                              create_widget_tree(window),
