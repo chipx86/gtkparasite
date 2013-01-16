@@ -20,6 +20,12 @@ libgtkparasite_la_SOURCES = \
 	widget-tree.c \
 	window.c
 
+if GTK3
+libgtkparasite_la_SOURCES += \
+	path-tree.h \
+	path-tree.c
+endif
+
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version -no-undefined \
 	$(GTK_LIBS) \

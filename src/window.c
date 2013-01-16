@@ -27,6 +27,9 @@
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
+#if GTK3
+#include "path-tree.h"
+#endif
 
 #include "config.h"
 
@@ -41,6 +44,10 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
                                      selected);
 	parasite_classtree_set_widget(PARASITE_CLASSTREE(parasite->class_tree),
 				      selected);
+#if GTK3
+	parasite_pathtree_set_widget(PARASITE_PATHTREE(parasite->path_tree),
+				     selected);
+#endif
 
         /* Flash the widget. */
         gtkparasite_flash_widget(parasite, selected);
@@ -182,6 +189,27 @@ create_class_tree_pane(ParasiteWindow *parasite)
     return swin;
 }
 
+#if GTK3
+
+static GtkWidget *
+create_path_tree_pane(ParasiteWindow *parasite)
+{
+    GtkWidget *swin;
+
+    swin = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
+                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
+                                        GTK_SHADOW_IN);
+
+    parasite->path_tree = parasite_pathtree_new();
+    gtk_container_add(GTK_CONTAINER(swin), parasite->path_tree);
+
+    return swin;
+}
+
+#endif
+
 static void
 on_show_graphic_updates_toggled(GtkWidget *toggle_button,
                                 ParasiteWindow *parasite)
@@ -212,6 +240,11 @@ create_widget_tree(ParasiteWindow *parasite)
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 			     create_class_tree_pane(parasite),
 			     gtk_label_new("Classes"));
+#if GTK3
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			     create_path_tree_pane(parasite),
+			     gtk_label_new("Path"));
+#endif
 
     return hpaned;
 }

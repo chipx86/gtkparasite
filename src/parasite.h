@@ -37,6 +37,9 @@ typedef struct
     GtkWidget *widget_tree;
     GtkWidget *prop_list;
     GtkWidget *class_tree;
+#if GTK3
+    GtkWidget *path_tree;
+#endif
     GtkWidget *action_list;
     GtkWidget *python_shell;
 
