@@ -224,6 +224,8 @@ create_widget_tree(ParasiteWindow *parasite)
     GtkWidget *swin;
     GtkWidget *hpaned;
     GtkWidget *notebook;
+    GtkWidget *label;
+    const gdouble angle = 270.0;
 
     hpaned = gtk_hpaned_new();
 
@@ -233,17 +235,26 @@ create_widget_tree(ParasiteWindow *parasite)
     notebook = gtk_notebook_new();
     gtk_paned_pack2(GTK_PANED(hpaned), notebook, FALSE, TRUE);
     gtk_widget_set_size_request(notebook, 250, -1);
+    gtk_notebook_set_tab_pos(notebook, GTK_POS_RIGHT);
 
+    label = gtk_label_new("Properties");
+    gtk_label_set_angle(GTK_LABEL(label), angle);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 			     create_prop_list_pane(parasite),
-			     gtk_label_new("Properties"));
+			     label);
+
+    label = gtk_label_new("Classes");
+    gtk_label_set_angle(GTK_LABEL(label), angle);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 			     create_class_tree_pane(parasite),
-			     gtk_label_new("Classes"));
+			     label);
+
 #if GTK3
+    label = gtk_label_new("Path");
+    gtk_label_set_angle(GTK_LABEL(label), angle);
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 			     create_path_tree_pane(parasite),
-			     gtk_label_new("Path"));
+			     label);
 #endif
 
     return hpaned;
