@@ -40,3 +40,7 @@ INCLUDES = \
 if HAVE_X11
 INCLUDES += -DHAVE_X11
 endif
+
+if GTK3
+INCLUDES += -DGTK3
+endif
