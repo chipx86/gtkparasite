@@ -63,20 +63,27 @@ AC_ARG_WITH([gtk],
 AC_MSG_RESULT([$GTK_API_VERSION])
 AC_SUBST(GTK_API_VERSION)
 
+AM_CONDITIONAL(GTK3, [test $GTK_API_VERSION = 3.0])
+
+GDK_BACKENDS=
+
 case "$GTK_API_VERSION" in
 3.0)
 	GTK_REQUIRED=3.0.0
+	GDK_BACKENDS=`pkg-config --variable=targets gtk+-$GTK_API_VERSION`
     ;;
 2.0)
 	GTK_REQUIRED=2.0.0
+	GDK_BACKENDS=`pkg-config --variable=target gtk+-$GTK_API_VERSION`
     ;;
 esac
 PKG_CHECK_MODULES(GTK, [gtk+-$GTK_API_VERSION >= $GTK_REQUIRED])
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GTK_LIBS)
 
-GDK_BACKEND=`pkg-config --variable=target gtk+-$GTK_API_VERSION`
-AM_CONDITIONAL(HAVE_X11, [test x"$GDK_BACKEND" = x"x11"])
+case "$GDK_BACKENDS" in *x11*) have_x11=true ;; *) have_x11=false ;; esac
+
+AM_CONDITIONAL(HAVE_X11, [test x$have_x11 = xtrue])
 
 AM_PATH_PYTHON([2.4], [
     AC_PATH_PROG(PYTHON_CONFIG, python$PYTHON_VERSION-config)
@@ -92,11 +99,10 @@ AM_PATH_PYTHON([2.4], [
     fi
 
     # Kind of a hacky way to get this, but that's alright..
-    if test x"$GDK_BACKEND" == x"quartz"; then
-        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.dylib"
-    else
-        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so"
-    fi
+    case "$GDK_BACKENDS" in
+    	*quartz*) PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.dylib" ;;
+	*)        PYTHON_SHARED_LIB="libpython${PYTHON_VERSION}.so" ;;
+    esac
     AC_SUBST(PYTHON_SHARED_LIB)
 
     case "$GTK_API_VERSION" in
@@ -152,6 +158,7 @@ echo $PACKAGE v$VERSION
 echo
 echo "GTK+ version:   $GTK_API_VERSION"
 echo "Python support: $has_pygtk"
+echo "GDK backends:   $GDK_BACKENDS"
 
 echo
 echo "Now type make to compile"
