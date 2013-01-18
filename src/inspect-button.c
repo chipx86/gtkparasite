@@ -143,7 +143,7 @@ on_highlight_widget(GtkWidget *grab_window,
 }
 
 
-static void
+static gboolean
 on_inspect_button_release(GtkWidget *button,
                           GdkEventButton *event,
                           ParasiteWindow *parasite)
@@ -178,19 +178,15 @@ on_inspect_button_release(GtkWidget *button,
                      cursor,
                      event->time);
     gdk_cursor_unref(cursor);
+    return FALSE;
 }
 
 
-GtkWidget *
-gtkparasite_inspect_button_new(ParasiteWindow *parasite)
+void
+gtkparasite_inspect_button_connect(ParasiteWindow *parasite, GtkWidget *button)
 {
-    GtkWidget *button;
-
-    button = gtk_button_new_with_label("Inspect");
     g_signal_connect(G_OBJECT(button), "button_release_event",
                      G_CALLBACK(on_inspect_button_release), parasite);
-
-    return button;
 }
 
 static gboolean

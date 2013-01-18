@@ -23,9 +23,13 @@
 #include "action-list.h"
 #include "parasite.h"
 #include "prop-list.h"
+#include "class-tree.h"
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
+#if GTK3
+#include "path-tree.h"
+#endif
 
 #include "config.h"
 
@@ -38,6 +42,12 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
     if (selected != NULL) {
         parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list),
                                      selected);
+	parasite_classtree_set_widget(PARASITE_CLASSTREE(parasite->class_tree),
+				      selected);
+#if GTK3
+	parasite_pathtree_set_widget(PARASITE_PATHTREE(parasite->path_tree),
+				     selected);
+#endif
 
         /* Flash the widget. */
         gtkparasite_flash_widget(parasite, selected);
@@ -126,7 +136,6 @@ create_widget_list_pane(ParasiteWindow *parasite)
                                         GTK_SHADOW_IN);
 
     parasite->widget_tree = parasite_widget_tree_new();
-    gtk_widget_show(parasite->widget_tree);
     gtk_container_add(GTK_CONTAINER(swin), parasite->widget_tree);
 
     g_signal_connect(G_OBJECT(parasite->widget_tree),
@@ -155,85 +164,129 @@ create_prop_list_pane(ParasiteWindow *parasite)
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
     gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
                                         GTK_SHADOW_IN);
-    gtk_widget_set_size_request(swin, 250, -1);
 
     parasite->prop_list = parasite_proplist_new();
-    gtk_widget_show(parasite->prop_list);
     gtk_container_add(GTK_CONTAINER(swin), parasite->prop_list);
 
     return swin;
 }
 
-static void
-on_edit_mode_toggled(GtkWidget *toggle_button,
-                     ParasiteWindow *parasite)
+static GtkWidget *
+create_class_tree_pane(ParasiteWindow *parasite)
 {
-    gboolean active =
-        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button));
+    GtkWidget *swin;
 
-    parasite->edit_mode_enabled = active;
-    parasite_widget_tree_set_edit_mode(PARASITE_WIDGET_TREE(parasite->widget_tree),
-                                       active);
+    swin = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
+                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
+                                        GTK_SHADOW_IN);
+
+    parasite->class_tree = parasite_classtree_new();
+    gtk_widget_show(parasite->class_tree);
+    gtk_container_add(GTK_CONTAINER(swin), parasite->class_tree);
+
+    return swin;
 }
+
+#if GTK3
+
+static GtkWidget *
+create_path_tree_pane(ParasiteWindow *parasite)
+{
+    GtkWidget *swin;
+
+    swin = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
+                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
+                                        GTK_SHADOW_IN);
+
+    parasite->path_tree = parasite_pathtree_new();
+    gtk_container_add(GTK_CONTAINER(swin), parasite->path_tree);
+
+    return swin;
+}
+
+#endif
 
 static void
 on_show_graphic_updates_toggled(GtkWidget *toggle_button,
                                 ParasiteWindow *parasite)
 {
     gdk_window_set_debug_updates(
-        gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggle_button)));
+        gtk_toggle_tool_button_get_active(GTK_TOGGLE_TOOL_BUTTON(toggle_button)));
+}
+
+void
+set_notebook_frameless_style(GtkWidget *notebook)
+{
+#if GTK3
+    GtkStyleContext *context;
+    GtkCssProvider *provider;
+    gchar *styling;
+    const gchar css[] = ".notebook { padding: 0; border-width: 0; }\n"
+                        ".notebook tab { padding: %dpx %dpx %dpx %dpx; "
+                                       " border-width: %dpx %dpx %dpx %dpx; }\n";
+    GtkBorder padding, border;
+
+    context = gtk_widget_get_style_context(notebook);
+    gtk_style_context_get_padding(context, GTK_STATE_FLAG_NORMAL, &padding);
+    gtk_style_context_get_border(context, GTK_STATE_FLAG_NORMAL, &border);
+    styling = g_strdup_printf(css, padding.top, padding.right,
+			      padding.bottom, padding.left,
+			      border.top, border.right,
+			      border.bottom, border.left);
+    provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_data(provider, styling, -1, NULL);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider),
+                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    g_free(styling);
+    g_object_unref(G_OBJECT(provider));
+#endif
 }
 
 static GtkWidget *
 create_widget_tree(ParasiteWindow *parasite)
 {
-    GtkWidget *vbox;
-    GtkWidget *bbox;
-    GtkWidget *button;
     GtkWidget *swin;
     GtkWidget *hpaned;
-
-    vbox = gtk_vbox_new(FALSE, 6);
-    gtk_widget_show(vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
-
-    bbox = gtk_hbutton_box_new();
-    gtk_widget_show(bbox);
-    gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 0);
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_START);
-    gtk_box_set_spacing(GTK_BOX(bbox), 6);
-
-    button = gtkparasite_inspect_button_new(parasite);
-    gtk_widget_show(button);
-    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
-
-    button = gtk_toggle_button_new_with_mnemonic("_Edit Mode");
-    gtk_widget_show(button);
-    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
-
-    g_signal_connect(G_OBJECT(button), "toggled",
-                     G_CALLBACK(on_edit_mode_toggled), parasite);
-
-    button = gtk_toggle_button_new_with_mnemonic("_Show Graphic Updates");
-    gtk_widget_show(button);
-    gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 0);
-
-    g_signal_connect(G_OBJECT(button), "toggled",
-                     G_CALLBACK(on_show_graphic_updates_toggled), parasite);
+    GtkWidget *notebook;
+    GtkWidget *label;
+    const gdouble angle = 270.0;
 
     hpaned = gtk_hpaned_new();
-    gtk_widget_show(hpaned);
-    gtk_box_pack_start(GTK_BOX(vbox), hpaned, TRUE, TRUE, 0);
 
     swin = create_widget_list_pane(parasite);
-    gtk_widget_show(swin);
     gtk_paned_pack1(GTK_PANED(hpaned), swin, TRUE, TRUE);
 
-    swin = create_prop_list_pane(parasite);
-    gtk_widget_show(swin);
-    gtk_paned_pack2(GTK_PANED(hpaned), swin, FALSE, TRUE);
+    notebook = gtk_notebook_new();
+    gtk_paned_pack2(GTK_PANED(hpaned), notebook, FALSE, TRUE);
+    gtk_widget_set_size_request(notebook, 250, -1);
+    gtk_notebook_set_tab_pos(notebook, GTK_POS_RIGHT);
+    set_notebook_frameless_style(notebook);
 
-    return vbox;
+    label = gtk_label_new("Properties");
+    gtk_label_set_angle(GTK_LABEL(label), angle);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			     create_prop_list_pane(parasite),
+			     label);
+
+    label = gtk_label_new("Classes");
+    gtk_label_set_angle(GTK_LABEL(label), angle);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			     create_class_tree_pane(parasite),
+			     label);
+
+#if GTK3
+    label = gtk_label_new("Path");
+    gtk_label_set_angle(GTK_LABEL(label), angle);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			     create_path_tree_pane(parasite),
+			     label);
+#endif
+
+    return hpaned;
 }
 
 static GtkWidget *
@@ -243,11 +296,8 @@ create_action_list(ParasiteWindow *parasite)
     GtkWidget *swin;
 
     vbox = gtk_vbox_new(FALSE, 6);
-    gtk_widget_show(vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
 
     swin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_show(swin);
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_ALWAYS);
@@ -256,7 +306,6 @@ create_action_list(ParasiteWindow *parasite)
     gtk_box_pack_start(GTK_BOX(vbox), swin, TRUE, TRUE, 0);
 
     parasite->action_list = parasite_actionlist_new(parasite);
-    gtk_widget_show(parasite->action_list);
     gtk_container_add(GTK_CONTAINER(swin), parasite->action_list);
 
     if (parasite_python_is_enabled())
@@ -270,10 +319,39 @@ create_action_list(ParasiteWindow *parasite)
     return vbox;
 }
 
+static GtkWidget *
+create_toolbar(ParasiteWindow *parasite)
+{
+    GtkToolbar *toolbar;
+    GtkToolItem *inspect, *updates;
+    GtkWidget *button;
+
+    toolbar = GTK_TOOLBAR(gtk_toolbar_new());
+    gtk_toolbar_set_icon_size(toolbar, GTK_ICON_SIZE_SMALL_TOOLBAR);
+    gtk_toolbar_set_style(toolbar, GTK_TOOLBAR_ICONS);
+
+    inspect = gtk_tool_button_new_from_stock(GTK_STOCK_FIND);
+    gtk_tool_item_set_tooltip_text(inspect, "Inspect");
+    gtk_toolbar_insert(toolbar, inspect, -1);
+
+    button = gtk_bin_get_child(GTK_BIN(inspect));
+    gtkparasite_inspect_button_connect(parasite, button);
+
+    updates = gtk_toggle_tool_button_new_from_stock(GTK_STOCK_REFRESH);
+    gtk_tool_item_set_tooltip_text(updates, "Show Graphic Updates");
+    gtk_toolbar_insert(toolbar, updates, -1);
+    g_signal_connect(G_OBJECT(updates), "toggled",
+                     G_CALLBACK(on_show_graphic_updates_toggled), parasite);
+
+    return GTK_WIDGET(toolbar);
+}
+
 void
 gtkparasite_window_create()
 {
     ParasiteWindow *window;
+    GtkWidget *vbox;
+    GtkWidget *toolbar;
     GtkWidget *vpaned;
     GtkWidget *notebook;
     char *title;
@@ -285,20 +363,24 @@ gtkparasite_window_create()
      */
     window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window->window), 1000, 500);
-    gtk_container_set_border_width(GTK_CONTAINER(window->window), 12);
-    gtk_widget_show(window->window);
 
     title = g_strdup_printf("Parasite - %s", g_get_application_name());
     gtk_window_set_title(GTK_WINDOW(window->window), title);
     g_free(title);
 
+    vbox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(window->window), vbox);
+
+    toolbar = create_toolbar(window);
+    gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 0);
+
     vpaned = gtk_vpaned_new();
-    gtk_widget_show(vpaned);
-    gtk_container_add(GTK_CONTAINER(window->window), vpaned);
+    gtk_container_set_border_width(GTK_CONTAINER(vpaned), 6);
+    gtk_box_pack_start(GTK_BOX(vbox), vpaned, TRUE, TRUE, 0);
 
     notebook = gtk_notebook_new();
-    gtk_widget_show(notebook);
     gtk_paned_pack1(GTK_PANED(vpaned), notebook, TRUE, FALSE);
+    set_notebook_frameless_style(notebook);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
                              create_widget_tree(window),
@@ -312,7 +394,6 @@ gtkparasite_window_create()
         GtkWidget *menuitem;
 
         window->python_shell = parasite_python_shell_new();
-        gtk_widget_show(window->python_shell);
         gtk_paned_pack2(GTK_PANED(vpaned), window->python_shell, FALSE, FALSE);
 
         /*
@@ -340,6 +421,8 @@ gtkparasite_window_create()
         g_signal_connect(G_OBJECT(menuitem), "activate",
                          G_CALLBACK(on_send_action_to_shell_activate), window);
     }
+
+    gtk_widget_show_all(window->window);
 }
 
 // vim: set et sw=4 ts=4:
