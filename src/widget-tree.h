@@ -61,9 +61,6 @@ void parasite_widget_tree_scan(ParasiteWidgetTree *widget_tree,
                                GtkWidget *window);
 void parasite_widget_tree_select_widget(ParasiteWidgetTree *widget_tree,
                                         GtkWidget *widget);
-void parasite_widget_tree_set_edit_mode(ParasiteWidgetTree *widget_tree,
-                                        gboolean edit);
-
 
 G_END_DECLS
 
