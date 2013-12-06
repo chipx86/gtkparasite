@@ -1,4 +1,4 @@
-moduledir = $(libdir)/gtk-$(GTK_API_VERSION)/modules
+moduledir = $(libdir)/gtk-3.0/modules
 
 libgtkparasite_la_SOURCES = \
 	action-list.c \
@@ -31,14 +31,10 @@ libgtkparasite_la_LIBADD =
 module_LTLIBRARIES = libgtkparasite.la
 
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	$(GTK_CFLAGS) \
 	$(PYTHON_CFLAGS) \
 	$(PYGTK_CFLAGS) \
 	-DPYTHON_SHARED_LIB="\"$(PYTHON_SHARED_LIB)\""
-
-if HAVE_X11
-INCLUDES += -DHAVE_X11
-endif
 
 -include $(top_srcdir)/git.mk

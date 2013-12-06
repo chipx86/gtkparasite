@@ -1,0 +1,19 @@
+Installation Instructions
+=========================
+
+Installing gtkparasite is pretty simple.
+
+Before you begin, make sure you have the GTK+ development headers installed.
+You can find this on your package management tool.
+
+We also recommend the Python development headers.
+
+If you're using GTK 3, then instead run:
+
+    $ ./autogen.sh --with-gtk=3.0
+
+Then run:
+
+    $ make
+    $ sudo make install
+
