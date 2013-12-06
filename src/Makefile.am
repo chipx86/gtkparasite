@@ -1,8 +1,6 @@
 moduledir = $(libdir)/gtk-3.0/modules
 
 libgtkparasite_la_SOURCES = \
-	action-list.c \
-	action-list.h \
 	inspect-button.c \
 	module.c \
 	parasite.h \

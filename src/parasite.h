@@ -36,14 +36,12 @@ typedef struct
     GtkWidget *window;
     GtkWidget *widget_tree;
     GtkWidget *prop_list;
-    GtkWidget *action_list;
     GtkWidget *python_shell;
 
     GtkWidget *grab_window;
     GtkWidget *highlight_window;
 
     GtkWidget *widget_popup;
-    GtkWidget *action_popup;
 
     GdkWindow *selected_window;
 

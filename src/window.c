@@ -20,7 +20,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "action-list.h"
 #include "parasite.h"
 #include "prop-list.h"
 #include "widget-tree.h"
@@ -60,21 +59,6 @@ on_widget_tree_button_press(ParasiteWidgetTree *widget_tree,
 }
 
 
-static gboolean
-on_action_list_button_press(ParasiteActionList *actionlist,
-                            GdkEventButton *event,
-                            ParasiteWindow *parasite)
-{
-    if (event->button == 3)
-    {
-        gtk_menu_popup(GTK_MENU(parasite->action_popup), NULL, NULL,
-                       NULL, NULL, event->button, event->time);
-    }
-
-    return FALSE;
-}
-
-
 static void
 on_send_widget_to_shell_activate(GtkWidget *menuitem,
                                  ParasiteWindow *parasite)
@@ -89,26 +73,6 @@ on_send_widget_to_shell_activate(GtkWidget *menuitem,
             str, NULL);
 
         g_free(str);
-        parasite_python_shell_focus(PARASITE_PYTHON_SHELL(parasite->python_shell));
-    }
-}
-
-
-static void
-on_send_action_to_shell_activate(GtkWidget *menuitem,
-                                 ParasiteWindow *parasite)
-{
-    gpointer selection = parasite_actionlist_get_selected_object(
-        PARASITE_ACTIONLIST(parasite->action_list));
-    if (selection != NULL) {
-        char *str = g_strdup_printf("parasite.gobj(%p)", selection);
-
-        parasite_python_shell_append_text(
-            PARASITE_PYTHON_SHELL(parasite->python_shell),
-            str, NULL);
-
-        g_free(str);
-
         parasite_python_shell_focus(PARASITE_PYTHON_SHELL(parasite->python_shell));
     }
 }
@@ -236,40 +200,6 @@ create_widget_tree(ParasiteWindow *parasite)
     return vbox;
 }
 
-static GtkWidget *
-create_action_list(ParasiteWindow *parasite)
-{
-    GtkWidget *vbox;
-    GtkWidget *swin;
-
-    vbox = gtk_vbox_new(FALSE, 6);
-    gtk_widget_show(vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(vbox), 12);
-
-    swin = gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_show(swin);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(swin),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_ALWAYS);
-    gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(swin),
-                                        GTK_SHADOW_IN);
-    gtk_box_pack_start(GTK_BOX(vbox), swin, TRUE, TRUE, 0);
-
-    parasite->action_list = parasite_actionlist_new(parasite);
-    gtk_widget_show(parasite->action_list);
-    gtk_container_add(GTK_CONTAINER(swin), parasite->action_list);
-
-    if (parasite_python_is_enabled())
-    {
-        g_signal_connect(G_OBJECT(parasite->action_list),
-                         "button-press-event",
-                         G_CALLBACK(on_action_list_button_press),
-                         parasite);
-    }
-
-    return vbox;
-}
-
 void
 gtkparasite_window_create()
 {
@@ -303,9 +233,6 @@ gtkparasite_window_create()
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
                              create_widget_tree(window),
                              gtk_label_new("Widget Tree"));
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
-                             create_action_list(window),
-                             gtk_label_new("Action List"));
 
     if (parasite_python_is_enabled())
     {
@@ -329,16 +256,6 @@ gtkparasite_window_create()
 
         g_signal_connect(G_OBJECT(menuitem), "activate",
                          G_CALLBACK(on_send_widget_to_shell_activate), window);
-
-        window->action_popup = gtk_menu_new();
-        gtk_widget_show(window->action_popup);
-
-        menuitem = gtk_menu_item_new_with_label("Send Object to Shell");
-        gtk_widget_show(menuitem);
-        gtk_menu_shell_append(GTK_MENU_SHELL(window->action_popup), menuitem);
-
-        g_signal_connect(G_OBJECT(menuitem), "activate",
-                         G_CALLBACK(on_send_action_to_shell_activate), window);
     }
 }
 
