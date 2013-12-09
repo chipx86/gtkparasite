@@ -37,6 +37,7 @@ typedef struct
     GtkWidget *widget_tree;
     GtkWidget *prop_list;
     GtkWidget *python_shell;
+    GtkWidget *button_path;
 
     GtkWidget *grab_window;
     GtkWidget *highlight_window;

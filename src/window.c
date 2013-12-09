@@ -26,9 +26,8 @@
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
-
+#include "button-path.h"
 #include "config.h"
-
 
 static void
 on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
@@ -41,6 +40,7 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
 
         /* Flash the widget. */
         gtkparasite_flash_widget(parasite, selected);
+        parasite_buttonpath_set_widget (PARASITE_BUTTONPATH (parasite->button_path), selected);
     }
 }
 
@@ -89,6 +89,7 @@ create_widget_list_pane(ParasiteWindow *parasite)
                         "vscrollbar-policy", GTK_POLICY_ALWAYS,
                         "shadow-type", GTK_SHADOW_IN,
                         "width-request", 250,
+                        "expand", TRUE,
                         NULL);
 
     parasite->widget_tree = parasite_widget_tree_new();
@@ -179,8 +180,8 @@ gtkparasite_window_create()
 {
     ParasiteWindow *window;
     GtkWidget *vpaned, *hpaned;
-    GtkWidget *notebook;
     GtkWidget *header;
+    GtkWidget *box;
     char *title;
 
     window = g_new0(ParasiteWindow, 1);
@@ -214,7 +215,13 @@ gtkparasite_window_create()
     gtk_paned_pack1 (GTK_PANED (hpaned), vpaned, TRUE, FALSE);
     gtk_paned_pack2 (GTK_PANED (hpaned), create_prop_list_pane (window), FALSE, FALSE);
 
-    gtk_paned_pack1 (GTK_PANED (vpaned), create_widget_list_pane (window), TRUE, FALSE);
+    box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
+
+    window->button_path = parasite_buttonpath_new ();
+    gtk_container_add (GTK_CONTAINER (box), window->button_path);
+
+    gtk_container_add (GTK_CONTAINER (box), create_widget_list_pane (window));
+    gtk_paned_pack1 (GTK_PANED (vpaned), box, TRUE, FALSE);
 
     if (parasite_python_is_enabled())
     {

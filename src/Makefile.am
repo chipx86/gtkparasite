@@ -14,7 +14,9 @@ libgtkparasite_la_SOURCES = \
 	python-shell.h \
 	widget-tree.h \
 	widget-tree.c \
-	window.c
+	window.c \
+	button-path.h \
+	button-path.c
 
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version -no-undefined \
