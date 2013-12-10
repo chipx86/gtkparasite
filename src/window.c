@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include "parasite.h"
 #include "prop-list.h"
+#include "classes-list.h"
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
@@ -41,6 +42,7 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
         /* Flash the widget. */
         gtkparasite_flash_widget(parasite, selected);
         parasite_buttonpath_set_widget (PARASITE_BUTTONPATH (parasite->button_path), selected);
+        parasite_classeslist_set_widget (PARASITE_CLASSESLIST (parasite->classes_list), selected);
     }
 }
 
@@ -182,6 +184,7 @@ gtkparasite_window_create()
     GtkWidget *vpaned, *hpaned;
     GtkWidget *header;
     GtkWidget *box;
+    GtkWidget *nb;
     char *title;
 
     window = g_new0(ParasiteWindow, 1);
@@ -213,7 +216,21 @@ gtkparasite_window_create()
 
     vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
     gtk_paned_pack1 (GTK_PANED (hpaned), vpaned, TRUE, FALSE);
-    gtk_paned_pack2 (GTK_PANED (hpaned), create_prop_list_pane (window), FALSE, FALSE);
+
+    nb = g_object_new (GTK_TYPE_NOTEBOOK,
+                       "enable-popup", TRUE,
+                       "show-border", FALSE,
+                       NULL);
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              create_prop_list_pane (window),
+                              gtk_label_new ("GObject"));
+
+    window->classes_list = parasite_classeslist_new ();
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              window->classes_list,
+                              gtk_label_new ("Classes"));
+
+    gtk_paned_pack2 (GTK_PANED (hpaned), nb, FALSE, FALSE);
 
     box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 

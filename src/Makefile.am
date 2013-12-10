@@ -16,7 +16,9 @@ libgtkparasite_la_SOURCES = \
 	widget-tree.c \
 	window.c \
 	button-path.h \
-	button-path.c
+	button-path.c \
+	classes-list.h \
+	classes-list.c
 
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version -no-undefined \
