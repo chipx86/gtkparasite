@@ -36,12 +36,12 @@
 typedef struct _ParasiteClassesListPrivate ParasiteClassesListPrivate;
 
 typedef struct _ParasiteClassesList {
-   GtkTreeView parent;
+   GtkBox parent;
    ParasiteClassesListPrivate *priv;
 } ParasiteClassesList;
 
 typedef struct _ParasiteClassesListClass {
-   GtkTreeViewClass parent;
+   GtkBoxClass parent;
 } ParasiteClassesListClass;
 
 G_BEGIN_DECLS
