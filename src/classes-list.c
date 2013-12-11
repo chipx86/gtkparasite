@@ -150,6 +150,59 @@ add_clicked (GtkButton *button, ParasiteClassesList *cl)
 }
 
 static void
+read_classes_from_style_context (ParasiteClassesList *cl)
+{
+  GList *l, *classes;
+  ParasiteClassesListByContext *c;
+  GtkTreeIter tree_iter;
+  GHashTable *hash_context;
+
+  hash_context = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  classes = gtk_style_context_list_classes (cl->priv->current_context);
+
+  for (l = classes; l; l = l->next)
+    {
+      c = g_new0 (ParasiteClassesListByContext, 1);
+      c->enabled = TRUE;
+      g_hash_table_insert (hash_context, g_strdup (l->data), c);
+
+      gtk_list_store_append (cl->priv->model, &tree_iter);
+      gtk_list_store_set (cl->priv->model, &tree_iter,
+                          COLUMN_ENABLED, TRUE,
+                          COLUMN_NAME, l->data,
+                          COLUMN_USER, FALSE,
+                          -1);
+    }
+    g_list_free (classes);
+    g_hash_table_replace (cl->priv->contexts, cl->priv->current_context, hash_context);
+}
+
+static void
+restore_defaults_clicked (GtkButton *button, ParasiteClassesList *cl)
+{
+  GHashTableIter hash_iter;
+  gchar *name;
+  ParasiteClassesListByContext *c;
+  GHashTable *hash_context = g_hash_table_lookup (cl->priv->contexts, cl->priv->current_context);
+
+  g_hash_table_iter_init (&hash_iter, hash_context);
+  while (g_hash_table_iter_next (&hash_iter, (gpointer *)&name, (gpointer *)&c))
+    {
+      if (c->user)
+        {
+          gtk_style_context_remove_class (cl->priv->current_context, name);
+        }
+      else if (!c->enabled)
+        {
+          gtk_style_context_add_class (cl->priv->current_context, name);
+        }
+    }
+
+  gtk_list_store_clear (cl->priv->model);
+  read_classes_from_style_context (cl);
+}
+
+static void
 create_toolbar (ParasiteClassesList *cl)
 {
   GtkWidget *toolbar, *button;
@@ -171,6 +224,7 @@ create_toolbar (ParasiteClassesList *cl)
                          "icon-name", "revert",
                          "tooltip-text", "Restore defaults for this widget",
                          NULL);
+  g_signal_connect (button, "clicked", G_CALLBACK (restore_defaults_clicked), cl);
   gtk_container_add (GTK_CONTAINER (cl->priv->toolbar), button);
 }
 
@@ -206,7 +260,7 @@ parasite_classeslist_init (ParasiteClassesList *cl)
 
   create_toolbar (cl);
 
-  cl->priv->contexts = g_hash_table_new (g_direct_hash, g_direct_equal);
+  cl->priv->contexts = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)g_hash_table_destroy);
   cl->priv->model = gtk_list_store_new (NUM_COLUMNS,
                                         G_TYPE_BOOLEAN,  // COLUMN_ENABLED
                                         G_TYPE_STRING,   // COLUMN_NAME
@@ -228,17 +282,6 @@ parasite_classeslist_init (ParasiteClassesList *cl)
                                                      NULL);
   gtk_tree_view_column_set_cell_data_func (column, renderer, (GtkTreeCellDataFunc)draw_name_column, cl, NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (cl->priv->view), column);
-}
-
-static void
-parasite_classeslist_class_init (ParasiteClassesListClass *klass)
-{
-}
-
-GtkWidget *
-parasite_classeslist_new ()
-{
-    return GTK_WIDGET (g_object_new (PARASITE_TYPE_CLASSESLIST, NULL));
 }
 
 void
@@ -275,27 +318,19 @@ parasite_classeslist_set_widget (ParasiteClassesList *cl,
     }
   else
     {
-      GList *l, *classes;
-
-      hash_context = g_hash_table_new (g_str_hash, g_str_equal);
-      classes = gtk_style_context_list_classes (widget_context);
-
-      for (l = classes; l; l = l->next)
-        {
-          c = g_new0 (ParasiteClassesListByContext, 1);
-          c->enabled = TRUE;
-          g_hash_table_insert (hash_context, g_strdup(l->data), c);
-
-          gtk_list_store_append (cl->priv->model, &tree_iter);
-          gtk_list_store_set (cl->priv->model, &tree_iter,
-                             COLUMN_ENABLED, TRUE,
-                             COLUMN_NAME, l->data,
-                             COLUMN_USER, FALSE,
-                            -1);
-        }
-      g_list_free (classes);
-      g_hash_table_insert (cl->priv->contexts, widget_context, hash_context);
+      read_classes_from_style_context (cl);
     }
+}
+
+static void
+parasite_classeslist_class_init (ParasiteClassesListClass *klass)
+{
+}
+
+GtkWidget *
+parasite_classeslist_new ()
+{
+    return GTK_WIDGET (g_object_new (PARASITE_TYPE_CLASSESLIST, NULL));
 }
 
 // vim: set et sw=4 ts=4:
