@@ -24,6 +24,7 @@
 #include "parasite.h"
 #include "prop-list.h"
 #include "classes-list.h"
+#include "css-editor.h"
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
@@ -229,6 +230,10 @@ gtkparasite_window_create()
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               window->classes_list,
                               gtk_label_new ("Classes"));
+
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              parasite_csseditor_new (),
+                              gtk_label_new ("Custom CSS"));
 
     gtk_paned_pack2 (GTK_PANED (hpaned), nb, FALSE, FALSE);
 

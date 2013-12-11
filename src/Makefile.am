@@ -18,7 +18,9 @@ libgtkparasite_la_SOURCES = \
 	button-path.h \
 	button-path.c \
 	classes-list.h \
-	classes-list.c
+	classes-list.c \
+	css-editor.h \
+	css-editor.c
 
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version -no-undefined \
