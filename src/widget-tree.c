@@ -35,7 +35,7 @@ enum
     WIDGET_VISIBLE,
     WIDGET_MAPPED,
     WIDGET_ADDRESS,
-    ROW_COLOR,
+    SENSITIVE,
     NUM_COLUMNS
 };
 
@@ -52,11 +52,9 @@ struct _ParasiteWidgetTreePrivate
     GtkTreeStore *model;
 };
 
-#define PARASITE_WIDGET_TREE_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_WIDGET_TREE, ParasiteWidgetTreePrivate))
-
-static GtkTreeViewClass *parent_class;
 static guint widget_tree_signals[LAST_SIGNAL] = { 0 };
 
+G_DEFINE_TYPE_WITH_PRIVATE (ParasiteWidgetTree, parasite_widget_tree, GTK_TYPE_TREE_VIEW)
 
 static void
 parasite_widget_tree_on_widget_selected(GtkTreeSelection *selection,
@@ -67,14 +65,13 @@ parasite_widget_tree_on_widget_selected(GtkTreeSelection *selection,
 
 
 static void
-parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
-                          ParasiteWidgetTreeClass *klass)
+parasite_widget_tree_init(ParasiteWidgetTree *widget_tree)
 {
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
     GtkTreeSelection *selection;
 
-    widget_tree->priv = PARASITE_WIDGET_TREE_GET_PRIVATE(widget_tree);
+    widget_tree->priv = parasite_widget_tree_get_instance_private (widget_tree);
 
     widget_tree->priv->model = gtk_tree_store_new(
         NUM_COLUMNS,
@@ -85,7 +82,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
         G_TYPE_BOOLEAN, // WIDGET_VISIBLE
         G_TYPE_BOOLEAN, // WIDGET_MAPPED
         G_TYPE_STRING,  // WIDGET_ADDRESS
-        G_TYPE_STRING); // ROW_COLOR
+        G_TYPE_BOOLEAN);// SENSITIVE
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(widget_tree),
                             GTK_TREE_MODEL(widget_tree->priv->model));
@@ -102,7 +99,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
     g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Widget", renderer,
                                                       "text", WIDGET_TYPE,
-                                                      "foreground", ROW_COLOR,
+                                                      "sensitive", SENSITIVE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -112,7 +109,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
     g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Name", renderer,
                                                       "text", WIDGET_NAME,
-                                                      "foreground", ROW_COLOR,
+                                                      "sensitive", SENSITIVE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -162,7 +159,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
     column = gtk_tree_view_column_new_with_attributes("Pointer Address",
                                                       renderer,
                                                       "text", WIDGET_ADDRESS,
-                                                      "foreground", ROW_COLOR,
+                                                      "sensitive", SENSITIVE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
@@ -176,8 +173,6 @@ parasite_widget_tree_class_init(ParasiteWidgetTreeClass *klass)
 
     klass->widget_changed = NULL;
 
-    parent_class = g_type_class_peek_parent(klass);
-
     widget_tree_signals[WIDGET_CHANGED] =
         g_signal_new("widget-changed",
                      G_OBJECT_CLASS_TYPE(klass),
@@ -186,37 +181,6 @@ parasite_widget_tree_class_init(ParasiteWidgetTreeClass *klass)
                      NULL, NULL,
                      g_cclosure_marshal_VOID__VOID,
                      G_TYPE_NONE, 0);
-
-    g_type_class_add_private(object_class, sizeof(ParasiteWidgetTreePrivate));
-}
-
-
-GType
-parasite_widget_tree_get_type()
-{
-    static GType type = 0;
-
-    if (type == 0)
-    {
-        static const GTypeInfo info =
-        {
-            sizeof(ParasiteWidgetTreeClass),
-            NULL, // base_init
-            NULL, // base_finalize
-            (GClassInitFunc) parasite_widget_tree_class_init,
-            NULL,
-            NULL, // class_data
-            sizeof(ParasiteWidgetTree),
-            0, // n_preallocs
-            (GInstanceInitFunc) parasite_widget_tree_init,
-        };
-
-        type = g_type_register_static(GTK_TYPE_TREE_VIEW,
-                                      "ParasiteWidgetTree",
-                                      &info, 0);
-    }
-
-    return type;
 }
 
 
@@ -264,7 +228,6 @@ append_widget(GtkTreeStore *model,
     GtkTreeIter iter;
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
     const char *name;
-    char *row_color = NULL;
     char *address;
     gboolean realized;
     gboolean mapped;
@@ -297,14 +260,6 @@ append_widget(GtkTreeStore *model,
     mapped = gtk_widget_get_mapped(widget);
     visible = gtk_widget_get_visible(widget);
 
-    if (!realized || !mapped || !visible)
-    {
-        GtkStyle* style = gtk_widget_get_style(GTK_WIDGET(widget));
-        GdkColor color = style->fg[GTK_STATE_INSENSITIVE];
-
-        row_color = gdk_color_to_string(&color);
-    }
-
     gtk_tree_store_append(model, &iter, parent_iter);
     gtk_tree_store_set(model, &iter,
                        WIDGET, widget,
@@ -314,11 +269,10 @@ append_widget(GtkTreeStore *model,
                        WIDGET_MAPPED, mapped,
                        WIDGET_VISIBLE, visible,
                        WIDGET_ADDRESS, address,
-                       ROW_COLOR, row_color,
+                       SENSITIVE, realized && mapped && visible,
                        -1);
 
     g_free(address);
-    g_free(row_color);
 
     if (GTK_IS_CONTAINER(widget))
     {
