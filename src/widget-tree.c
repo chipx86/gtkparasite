@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2008-2009  Christian Hammond
  * Copyright (c) 2008-2009  David Trowbridge
+ * Copyright (c) 2013 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -23,12 +24,7 @@
 #include "parasite.h"
 #include "prop-list.h"
 #include "widget-tree.h"
-
 #include <string.h>
-#if HAVE_X11
-#include <gdk/gdkx.h>
-#endif
-
 
 enum
 {
@@ -38,7 +34,6 @@ enum
     WIDGET_REALIZED,
     WIDGET_VISIBLE,
     WIDGET_MAPPED,
-    WIDGET_WINDOW,
     WIDGET_ADDRESS,
     ROW_COLOR,
     NUM_COLUMNS
@@ -89,7 +84,6 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
         G_TYPE_BOOLEAN, // WIDGET_REALIZED
         G_TYPE_BOOLEAN, // WIDGET_VISIBLE
         G_TYPE_BOOLEAN, // WIDGET_MAPPED
-        G_TYPE_STRING,  // WIDGET_WINDOW
         G_TYPE_STRING,  // WIDGET_ADDRESS
         G_TYPE_STRING); // ROW_COLOR
 
@@ -158,20 +152,6 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree,
                                                       "active", WIDGET_VISIBLE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-
-    // X Window column
-    renderer = gtk_cell_renderer_text_new();
-    g_object_set(G_OBJECT(renderer),
-                 "scale", TREE_TEXT_SCALE,
-                 "family", "monospace",
-                 NULL);
-    column = gtk_tree_view_column_new_with_attributes("X Window",
-                                                      renderer,
-                                                      "text", WIDGET_WINDOW,
-                                                      "foreground", ROW_COLOR,
-                                                      NULL);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
-    gtk_tree_view_column_set_resizable(column, TRUE);
 
     // Poinder Address column
     renderer = gtk_cell_renderer_text_new();
@@ -285,7 +265,6 @@ append_widget(GtkTreeStore *model,
     const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
     const char *name;
     char *row_color = NULL;
-    char *window_info;
     char *address;
     gboolean realized;
     gboolean mapped;
@@ -312,20 +291,6 @@ append_widget(GtkTreeStore *model,
         }
     }
 
-    if (gtk_widget_get_window(widget))
-    {
-#if HAVE_X11
-	window_info = g_strdup_printf("%p (XID 0x%x)", widget->window,
-	                              (int)GDK_WINDOW_XID(widget->window));
-#else
-	window_info = g_strdup("");
-#endif
-    }
-    else
-    {
-        window_info = g_strdup("");
-    }
-
     address = g_strdup_printf("%p", widget);
 
     realized = gtk_widget_get_realized(widget);
@@ -348,12 +313,10 @@ append_widget(GtkTreeStore *model,
                        WIDGET_REALIZED, realized,
                        WIDGET_MAPPED, mapped,
                        WIDGET_VISIBLE, visible,
-                       WIDGET_WINDOW, window_info,
                        WIDGET_ADDRESS, address,
                        ROW_COLOR, row_color,
                        -1);
 
-    g_free(window_info);
     g_free(address);
     g_free(row_color);
 
