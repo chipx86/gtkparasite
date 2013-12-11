@@ -37,7 +37,10 @@ parasite_buttonpath_init (ParasiteButtonPath *bp)
 
   bp->priv = parasite_buttonpath_get_instance_private (bp);
 
-  g_object_set (bp, "orientation", GTK_ORIENTATION_HORIZONTAL, NULL);
+  g_object_set (bp,
+                "orientation", GTK_ORIENTATION_HORIZONTAL,
+                "margin-bottom", 6,
+                NULL);
 
   bp->priv->sw = g_object_new (GTK_TYPE_SCROLLED_WINDOW,
                                "hscrollbar-policy", GTK_POLICY_AUTOMATIC,

@@ -212,8 +212,14 @@ gtkparasite_window_create()
 
     g_free(title);
 
+    box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_add (GTK_CONTAINER (window->window), box);
+
+    window->button_path = parasite_buttonpath_new ();
+    gtk_container_add (GTK_CONTAINER (box), window->button_path);
+
     hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
-    gtk_container_add (GTK_CONTAINER (window->window), hpaned);
+    gtk_container_add (GTK_CONTAINER (box), hpaned);
 
     vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
     gtk_paned_pack1 (GTK_PANED (hpaned), vpaned, TRUE, FALSE);
@@ -224,12 +230,12 @@ gtkparasite_window_create()
                        NULL);
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               create_prop_list_pane (window),
-                              gtk_label_new ("GObject"));
+                              gtk_label_new ("GObject Properties"));
 
     window->classes_list = parasite_classeslist_new ();
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               window->classes_list,
-                              gtk_label_new ("Classes"));
+                              gtk_label_new ("CSS Classes"));
 
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               parasite_csseditor_new (),
@@ -237,13 +243,7 @@ gtkparasite_window_create()
 
     gtk_paned_pack2 (GTK_PANED (hpaned), nb, FALSE, FALSE);
 
-    box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
-
-    window->button_path = parasite_buttonpath_new ();
-    gtk_container_add (GTK_CONTAINER (box), window->button_path);
-
-    gtk_container_add (GTK_CONTAINER (box), create_widget_list_pane (window));
-    gtk_paned_pack1 (GTK_PANED (vpaned), box, TRUE, FALSE);
+    gtk_paned_pack1 (GTK_PANED (vpaned), create_widget_list_pane (window), TRUE, FALSE);
 
     if (parasite_python_is_enabled())
     {
