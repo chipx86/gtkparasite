@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013  Jonh Wendell
+ * Copyright (c) 2013 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -39,7 +39,6 @@ parasite_buttonpath_init (ParasiteButtonPath *bp)
 
   g_object_set (bp,
                 "orientation", GTK_ORIENTATION_HORIZONTAL,
-                "margin-bottom", 6,
                 NULL);
 
   bp->priv->sw = g_object_new (GTK_TYPE_SCROLLED_WINDOW,
@@ -52,6 +51,7 @@ parasite_buttonpath_init (ParasiteButtonPath *bp)
   bp->priv->button_box = g_object_new (GTK_TYPE_BOX,
                                        "orientation", GTK_ORIENTATION_HORIZONTAL,
                                        "hexpand", TRUE,
+                                       "margin", 6,
                                        NULL);
   gtk_style_context_add_class (gtk_widget_get_style_context (bp->priv->button_box), "linked");
   gtk_container_add (GTK_CONTAINER (bp->priv->sw), bp->priv->button_box);

@@ -47,7 +47,10 @@ typedef struct _ParasiteCssEditorClass {
 G_BEGIN_DECLS
 
 GType parasite_csseditor_get_type ();
-GtkWidget *parasite_csseditor_new ();
+
+GtkWidget *parasite_csseditor_new (gboolean global);
+void parasite_csseditor_set_widget (ParasiteCssEditor *editor,
+                                    GtkWidget         *widget);
 
 G_END_DECLS
 

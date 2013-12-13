@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2008-2009  Christian Hammond
  * Copyright (c) 2008-2009  David Trowbridge
+ * Copyright (c) 2013 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -44,6 +45,7 @@ on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
         gtkparasite_flash_widget(parasite, selected);
         parasite_buttonpath_set_widget (PARASITE_BUTTONPATH (parasite->button_path), selected);
         parasite_classeslist_set_widget (PARASITE_CLASSESLIST (parasite->classes_list), selected);
+        parasite_csseditor_set_widget (PARASITE_CSSEDITOR (parasite->widget_css_editor), selected);
     }
 }
 
@@ -193,9 +195,10 @@ gtkparasite_window_create()
     /*
      * Create the top-level window.
      */
-    window->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size(GTK_WINDOW(window->window), 1000, 500);
-    gtk_container_set_border_width(GTK_CONTAINER(window->window), 12);
+    window->window = g_object_new (GTK_TYPE_WINDOW,
+                                   "default-height", 500,
+                                   "default-width", 1000,
+                                   NULL);
     g_signal_connect (window->window,
                       "delete-event",
                       G_CALLBACK (delete_window),
@@ -212,8 +215,21 @@ gtkparasite_window_create()
 
     g_free(title);
 
+    nb = g_object_new (GTK_TYPE_NOTEBOOK,
+                       "show-border", FALSE,
+                       "margin-left", 6,
+                       "margin-right", 6,
+                       "margin-bottom", 6,
+                       NULL);
+    gtk_container_add (GTK_CONTAINER (window->window), nb);
+
     box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add (GTK_CONTAINER (window->window), box);
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              box,
+                              gtk_label_new ("Widget Tree"));
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              parasite_csseditor_new (TRUE),
+                              gtk_label_new ("Custom CSS"));
 
     window->button_path = parasite_buttonpath_new ();
     gtk_container_add (GTK_CONTAINER (box), window->button_path);
@@ -237,8 +253,9 @@ gtkparasite_window_create()
                               window->classes_list,
                               gtk_label_new ("CSS Classes"));
 
+    window->widget_css_editor = parasite_csseditor_new (FALSE);
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
-                              parasite_csseditor_new (),
+                              window->widget_css_editor,
                               gtk_label_new ("Custom CSS"));
 
     gtk_paned_pack2 (GTK_PANED (hpaned), nb, FALSE, FALSE);
