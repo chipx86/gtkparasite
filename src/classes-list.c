@@ -253,6 +253,7 @@ parasite_classeslist_init (ParasiteClassesList *cl)
 {
   GtkCellRenderer *renderer;
   GtkTreeViewColumn *column;
+  GtkWidget *sw;
 
   g_object_set (cl, "orientation", GTK_ORIENTATION_VERTICAL, NULL);
 
@@ -260,13 +261,18 @@ parasite_classeslist_init (ParasiteClassesList *cl)
 
   create_toolbar (cl);
 
+  sw = g_object_new (GTK_TYPE_SCROLLED_WINDOW,
+                     "expand", TRUE,
+                     NULL);
+  gtk_container_add (GTK_CONTAINER (cl), sw);
+
   cl->priv->contexts = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)g_hash_table_destroy);
   cl->priv->model = gtk_list_store_new (NUM_COLUMNS,
                                         G_TYPE_BOOLEAN,  // COLUMN_ENABLED
                                         G_TYPE_STRING,   // COLUMN_NAME
                                         G_TYPE_BOOLEAN); // COLUMN_USER
   cl->priv->view = gtk_tree_view_new_with_model (GTK_TREE_MODEL (cl->priv->model));
-  gtk_container_add (GTK_CONTAINER (cl), cl->priv->view);
+  gtk_container_add (GTK_CONTAINER (sw), cl->priv->view);
 
   renderer = gtk_cell_renderer_toggle_new ();
   g_signal_connect (renderer, "toggled", G_CALLBACK (enabled_toggled), cl);
