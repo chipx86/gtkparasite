@@ -23,8 +23,9 @@
 #ifndef _PARASITE_PYTHON_SHELL_H_
 #define _PARASITE_PYTHON_SHELL_H_
 
-typedef struct _ParasitePythonShell      ParasitePythonShell;
-typedef struct _ParasitePythonShellClass ParasitePythonShellClass;
+typedef struct _ParasitePythonShell         ParasitePythonShell;
+typedef struct _ParasitePythonShellClass    ParasitePythonShellClass;
+typedef struct _ParasitePythonShellPrivate  ParasitePythonShellPrivate;
 
 #include <gtk/gtk.h>
 
@@ -43,22 +44,13 @@ typedef struct _ParasitePythonShellClass ParasitePythonShellClass;
 
 struct _ParasitePythonShell
 {
-	GtkVBox parent_object;
-
-	void (*gtk_reserved1)(void);
-	void (*gtk_reserved2)(void);
-	void (*gtk_reserved3)(void);
-	void (*gtk_reserved4)(void);
+  GtkBox parent_object;
+  ParasitePythonShellPrivate *priv;
 };
 
 struct _ParasitePythonShellClass
 {
-	GtkVBoxClass parent_class;
-
-	void (*gtk_reserved1)(void);
-	void (*gtk_reserved2)(void);
-	void (*gtk_reserved3)(void);
-	void (*gtk_reserved4)(void);
+ GtkBoxClass parent_class;
 };
 
 G_BEGIN_DECLS

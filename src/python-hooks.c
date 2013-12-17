@@ -161,7 +161,7 @@ parasite_python_init(void)
 
 #ifdef USE_GOBJECT_INTROSPECTION
     //pygtk = PyImport_ImportModule("gtk");
-    wchar_t *argv[] = { L"", NULL };
+    char *argv[] = { "", NULL };
     PySys_SetArgv(0, argv);
 #else
     init_pygtk();

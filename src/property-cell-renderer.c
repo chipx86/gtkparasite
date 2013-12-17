@@ -255,8 +255,8 @@ start_editing (GtkCellRenderer *renderer,
             {
                 GEnumValue *enum_value = &enum_class->values[i];
 
-                gtk_combo_box_append_text(GTK_COMBO_BOX(combobox),
-                                          enum_value->value_name);
+                gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combobox),
+                                                enum_value->value_name);
 
                 if (enum_value->value == value)
                     gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), i);
