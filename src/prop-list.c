@@ -30,6 +30,7 @@ enum
   COLUMN_NAME,
   COLUMN_VALUE,
   COLUMN_OBJECT,
+  COLUMN_TOOLTIP,
   NUM_COLUMNS
 };
 
@@ -46,6 +47,7 @@ struct _ParasitePropListPrivate
   GHashTable *prop_iters;
   GList *signal_cnxs;
   GtkWidget *widget_tree;
+  GtkTreeViewColumn *property_column;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (ParasitePropList, parasite_proplist, GTK_TYPE_TREE_VIEW)
@@ -54,6 +56,44 @@ static void
 parasite_proplist_init (ParasitePropList *pl)
 {
   pl->priv = parasite_proplist_get_instance_private (pl);
+}
+
+static gboolean
+query_tooltip_cb (GtkWidget        *widget,
+			      gint             x,
+			      gint             y,
+			      gboolean         keyboard_tip,
+			      GtkTooltip       *tooltip,
+			      ParasitePropList *pl)
+{
+  GtkTreeIter iter;
+  GtkTreeView *tree_view = GTK_TREE_VIEW (widget);
+  GtkTreeModel *model = gtk_tree_view_get_model (tree_view);
+  GtkTreePath *path = NULL;
+  gchar *tooltip_text;
+
+  if (!gtk_tree_view_get_tooltip_context (tree_view,
+                                          &x,
+                                          &y,
+                                          keyboard_tip,
+                                          &model,
+                                          &path,
+                                          &iter))
+    return FALSE;
+
+  gtk_tree_model_get (model, &iter, COLUMN_TOOLTIP, &tooltip_text, -1);
+  gtk_tooltip_set_text (tooltip, tooltip_text);
+
+  gtk_tree_view_set_tooltip_cell (tree_view,
+                                  tooltip,
+                                  path,
+                                  pl->priv->property_column,
+                                  NULL);
+
+  gtk_tree_path_free (path);
+  g_free (tooltip_text);
+
+  return TRUE;
 }
 
 static void
@@ -71,18 +111,19 @@ constructed (GObject *object)
   pl->priv->model = gtk_list_store_new(NUM_COLUMNS,
                                        G_TYPE_STRING,  // COLUMN_NAME
                                        G_TYPE_STRING,  // COLUMN_VALUE
-                                       G_TYPE_OBJECT); // COLUMN_OBJECT
+                                       G_TYPE_OBJECT,  // COLUMN_OBJECT
+                                       G_TYPE_STRING); // COLUMN_TOOLTIP
   gtk_tree_view_set_model (GTK_TREE_VIEW (pl),
                            GTK_TREE_MODEL (pl->priv->model));
 
   renderer = gtk_cell_renderer_text_new();
   g_object_set (renderer, "scale", TREE_TEXT_SCALE, NULL);
-  column = gtk_tree_view_column_new_with_attributes ("Property",
-                                                     renderer,
-                                                     "text", COLUMN_NAME,
-                                                     NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (pl), column);
-  g_object_set (column,
+  pl->priv->property_column = gtk_tree_view_column_new_with_attributes ("Property",
+                                                                        renderer,
+                                                                        "text", COLUMN_NAME,
+                                                                        NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (pl), pl->priv->property_column);
+  g_object_set (pl->priv->property_column,
                 "resizable", TRUE,
                 "sort-order", GTK_SORT_ASCENDING,
                 "sort-column-id", COLUMN_NAME,
@@ -105,6 +146,9 @@ constructed (GObject *object)
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (pl->priv->model),
                                         COLUMN_NAME,
                                         GTK_SORT_ASCENDING);
+
+  g_object_set (object, "has-tooltip", TRUE, NULL);
+  g_signal_connect (object, "query-tooltip", G_CALLBACK (query_tooltip_cb), pl);
 }
 
 static void
@@ -192,6 +236,7 @@ parasite_prop_list_update_prop (ParasitePropList *pl,
                       COLUMN_NAME, prop->name,
                       COLUMN_VALUE, value,
                       COLUMN_OBJECT, pl->priv->object,
+                      COLUMN_TOOLTIP, g_param_spec_get_blurb (prop),
                       -1);
 
   g_free (value);
