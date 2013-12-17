@@ -51,8 +51,8 @@ on_inspect_widget(GtkWidget *grab_window,
 
         if (widget)
         {
-            parasite_widget_tree_select_widget(PARASITE_WIDGET_TREE(parasite->widget_tree),
-                                               widget);
+            parasite_widget_tree_select_object (PARASITE_WIDGET_TREE (parasite->widget_tree),
+                                                G_OBJECT (widget));
         }
     }
 }

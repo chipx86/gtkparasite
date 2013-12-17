@@ -54,13 +54,21 @@ typedef struct _ParasiteWidgetTreeClass {
 G_BEGIN_DECLS
 
 
-GType parasite_widget_tree_get_type();
-GtkWidget *parasite_widget_tree_new();
-GtkWidget *parasite_widget_tree_get_selected_widget(ParasiteWidgetTree *widget_tree);
-void parasite_widget_tree_scan(ParasiteWidgetTree *widget_tree,
-                               GtkWidget *window);
-void parasite_widget_tree_select_widget(ParasiteWidgetTree *widget_tree,
-                                        GtkWidget *widget);
+GType      parasite_widget_tree_get_type            (void);
+GtkWidget *parasite_widget_tree_new                 (void);
+
+GObject   *parasite_widget_tree_get_selected_object (ParasiteWidgetTree *widget_tree);
+
+void       parasite_widget_tree_scan                (ParasiteWidgetTree *widget_tree,
+                                                     GtkWidget *window);
+void       parasite_widget_tree_select_object       (ParasiteWidgetTree *widget_tree,
+                                                     GObject            *object);
+void       parasite_widget_tree_append_object       (ParasiteWidgetTree *widget_tree,
+                                                     GObject            *object,
+                                                     GtkTreeIter        *parent_iter);
+gboolean   parasite_widget_tree_find_object         (ParasiteWidgetTree *widget_tree,
+                                                     GObject            *object,
+                                                     GtkTreeIter        *iter);
 
 G_END_DECLS
 

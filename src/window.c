@@ -33,19 +33,30 @@
 #include "config.h"
 
 static void
-on_widget_tree_selection_changed(ParasiteWidgetTree *widget_tree,
-                                 ParasiteWindow *parasite)
+on_widget_tree_selection_changed (ParasiteWidgetTree *widget_tree,
+                                  ParasiteWindow     *parasite)
 {
-    GtkWidget *selected = parasite_widget_tree_get_selected_widget(widget_tree);
-    if (selected != NULL) {
-        parasite_proplist_set_widget(PARASITE_PROPLIST(parasite->prop_list),
-                                     selected);
+  GObject *selected = parasite_widget_tree_get_selected_object (widget_tree);
 
-        /* Flash the widget. */
-        gtkparasite_flash_widget(parasite, selected);
-        parasite_buttonpath_set_widget (PARASITE_BUTTONPATH (parasite->button_path), selected);
-        parasite_classeslist_set_widget (PARASITE_CLASSESLIST (parasite->classes_list), selected);
-        parasite_csseditor_set_widget (PARASITE_CSSEDITOR (parasite->widget_css_editor), selected);
+  if (selected != NULL)
+    {
+      parasite_proplist_set_object (PARASITE_PROPLIST (parasite->prop_list),
+                                    selected);
+
+      if (GTK_IS_WIDGET (selected))
+        {
+          GtkWidget *widget = GTK_WIDGET (selected);
+
+          gtkparasite_flash_widget(parasite, widget);
+          parasite_buttonpath_set_widget (PARASITE_BUTTONPATH (parasite->button_path), widget);
+          parasite_classeslist_set_widget (PARASITE_CLASSESLIST (parasite->classes_list), widget);
+          parasite_csseditor_set_widget (PARASITE_CSSEDITOR (parasite->widget_css_editor), widget);
+        }
+      else
+        {
+          gtk_widget_set_sensitive (parasite->classes_list, FALSE);
+          gtk_widget_set_sensitive (parasite->widget_css_editor, FALSE);
+        }
     }
 }
 
@@ -69,18 +80,21 @@ static void
 on_send_widget_to_shell_activate(GtkWidget *menuitem,
                                  ParasiteWindow *parasite)
 {
-    GtkWidget *widget = parasite_widget_tree_get_selected_widget(
-        PARASITE_WIDGET_TREE(parasite->widget_tree));
-    if (widget != NULL) {
-        char *str = g_strdup_printf("parasite.gobj(%p)", widget);
+  char *str;
+  GObject *object;
 
-        parasite_python_shell_append_text(
-            PARASITE_PYTHON_SHELL(parasite->python_shell),
-            str, NULL);
+  object = parasite_widget_tree_get_selected_object (PARASITE_WIDGET_TREE (parasite->widget_tree));
 
-        g_free(str);
-        parasite_python_shell_focus(PARASITE_PYTHON_SHELL(parasite->python_shell));
-    }
+  if (!object)
+    return;
+
+  str = g_strdup_printf ("parasite.gobj(%p)", object);
+  parasite_python_shell_append_text (PARASITE_PYTHON_SHELL (parasite->python_shell),
+                                     str,
+                                     NULL);
+
+  g_free(str);
+  parasite_python_shell_focus (PARASITE_PYTHON_SHELL (parasite->python_shell));
 }
 
 
@@ -128,7 +142,7 @@ create_prop_list_pane(ParasiteWindow *parasite)
                         "width-request", 250,
                         NULL);
 
-    parasite->prop_list = parasite_proplist_new();
+    parasite->prop_list = parasite_proplist_new (parasite->widget_tree);
     gtk_container_add(GTK_CONTAINER(swin), parasite->prop_list);
 
     return swin;
@@ -239,6 +253,7 @@ gtkparasite_window_create()
 
     vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
     gtk_paned_pack1 (GTK_PANED (hpaned), vpaned, TRUE, FALSE);
+    gtk_paned_pack1 (GTK_PANED (vpaned), create_widget_list_pane (window), TRUE, FALSE);
 
     nb = g_object_new (GTK_TYPE_NOTEBOOK,
                        "enable-popup", TRUE,
@@ -259,8 +274,6 @@ gtkparasite_window_create()
                               gtk_label_new ("Custom CSS"));
 
     gtk_paned_pack2 (GTK_PANED (hpaned), nb, FALSE, FALSE);
-
-    gtk_paned_pack1 (GTK_PANED (vpaned), create_widget_list_pane (window), TRUE, FALSE);
 
     if (parasite_python_is_enabled())
     {

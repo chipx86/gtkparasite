@@ -34,11 +34,12 @@
 #define PARASITE_IS_PROPERTY_CELL_RENDERER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), PARASITE_TYPE_PROPERTY_CELL_RENDERER))
 #define PARASITE_PROPERTY_CELL_RENDERER_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj), PARASITE_TYPE_PROPERTY_CELL_RENDERER, ParasitePropertyCellRendererClass))
 
+typedef struct _ParasitePropertyCellRendererPrivate ParasitePropertyCellRendererPrivate;
 
 typedef struct
 {
-   GtkCellRendererText parent;
-
+  GtkCellRendererText parent;
+  ParasitePropertyCellRendererPrivate *priv;
 } ParasitePropertyCellRenderer;
 
 typedef struct

@@ -28,28 +28,29 @@
 
 enum
 {
-    WIDGET,
-    WIDGET_TYPE,
-    WIDGET_NAME,
-    WIDGET_REALIZED,
-    WIDGET_VISIBLE,
-    WIDGET_MAPPED,
-    WIDGET_ADDRESS,
-    SENSITIVE,
-    NUM_COLUMNS
+  OBJECT,
+  OBJECT_TYPE,
+  OBJECT_NAME,
+  WIDGET_REALIZED,
+  WIDGET_VISIBLE,
+  WIDGET_MAPPED,
+  OBJECT_ADDRESS,
+  SENSITIVE,
+  NUM_COLUMNS
 };
 
 
 enum
 {
-    WIDGET_CHANGED,
-    LAST_SIGNAL
+  WIDGET_CHANGED,
+  LAST_SIGNAL
 };
 
 
 struct _ParasiteWidgetTreePrivate
 {
-    GtkTreeStore *model;
+  GtkTreeStore *model;
+  GHashTable *iters;
 };
 
 static guint widget_tree_signals[LAST_SIGNAL] = { 0 };
@@ -65,7 +66,7 @@ parasite_widget_tree_on_widget_selected(GtkTreeSelection *selection,
 
 
 static void
-parasite_widget_tree_init(ParasiteWidgetTree *widget_tree)
+parasite_widget_tree_init (ParasiteWidgetTree *widget_tree)
 {
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
@@ -73,21 +74,26 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree)
 
     widget_tree->priv = parasite_widget_tree_get_instance_private (widget_tree);
 
+    widget_tree->priv->iters = g_hash_table_new_full (g_direct_hash,
+                                                      g_direct_equal,
+                                                      NULL,
+                                                      (GDestroyNotify) gtk_tree_iter_free);
+
     widget_tree->priv->model = gtk_tree_store_new(
         NUM_COLUMNS,
-        G_TYPE_POINTER, // WIDGET
-        G_TYPE_STRING,  // WIDGET_NAME
-        G_TYPE_STRING,  // WIDGET_NAME
+        G_TYPE_POINTER, // OBJECT
+        G_TYPE_STRING,  // OBJECT_TYPE
+        G_TYPE_STRING,  // OBJECT_NAME
         G_TYPE_BOOLEAN, // WIDGET_REALIZED
         G_TYPE_BOOLEAN, // WIDGET_VISIBLE
         G_TYPE_BOOLEAN, // WIDGET_MAPPED
-        G_TYPE_STRING,  // WIDGET_ADDRESS
+        G_TYPE_STRING,  // OBJECT_ADDRESS
         G_TYPE_BOOLEAN);// SENSITIVE
 
     gtk_tree_view_set_model(GTK_TREE_VIEW(widget_tree),
                             GTK_TREE_MODEL(widget_tree->priv->model));
     gtk_tree_view_set_enable_search(GTK_TREE_VIEW(widget_tree), TRUE);
-    gtk_tree_view_set_search_column(GTK_TREE_VIEW(widget_tree), WIDGET_NAME);
+    gtk_tree_view_set_search_column(GTK_TREE_VIEW(widget_tree), OBJECT_NAME);
 
     selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget_tree));
     g_signal_connect(G_OBJECT(selection), "changed",
@@ -98,7 +104,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree)
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Widget", renderer,
-                                                      "text", WIDGET_TYPE,
+                                                      "text", OBJECT_TYPE,
                                                       "sensitive", SENSITIVE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
@@ -108,7 +114,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree)
     renderer = gtk_cell_renderer_text_new();
     g_object_set(G_OBJECT(renderer), "scale", TREE_TEXT_SCALE, NULL);
     column = gtk_tree_view_column_new_with_attributes("Name", renderer,
-                                                      "text", WIDGET_NAME,
+                                                      "text", OBJECT_NAME,
                                                       "sensitive", SENSITIVE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
@@ -158,7 +164,7 @@ parasite_widget_tree_init(ParasiteWidgetTree *widget_tree)
                  NULL);
     column = gtk_tree_view_column_new_with_attributes("Pointer Address",
                                                       renderer,
-                                                      "text", WIDGET_ADDRESS,
+                                                      "text", OBJECT_ADDRESS,
                                                       "sensitive", SENSITIVE,
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
@@ -185,31 +191,31 @@ parasite_widget_tree_class_init(ParasiteWidgetTreeClass *klass)
 
 
 GtkWidget *
-parasite_widget_tree_new()
+parasite_widget_tree_new ()
 {
-    return GTK_WIDGET(g_object_new(PARASITE_TYPE_WIDGET_TREE, NULL));
+  return g_object_new (PARASITE_TYPE_WIDGET_TREE, NULL);
 }
 
 
-GtkWidget *
-parasite_widget_tree_get_selected_widget(ParasiteWidgetTree *widget_tree)
+GObject *
+parasite_widget_tree_get_selected_object (ParasiteWidgetTree *widget_tree)
 {
-    GtkTreeIter iter;
-    GtkTreeSelection *sel;
-    GtkTreeModel *model;
+  GtkTreeIter iter;
+  GtkTreeSelection *sel;
+  GtkTreeModel *model;
 
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget_tree));
+  sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (widget_tree));
 
-    if (gtk_tree_selection_get_selected(sel, &model, &iter))
+  if (gtk_tree_selection_get_selected (sel, &model, &iter))
     {
-        GtkWidget *widget;
-
-        gtk_tree_model_get(GTK_TREE_MODEL(model), &iter,
-                           WIDGET, &widget,
-                           -1);
-        return widget;
+      GObject *object;
+      gtk_tree_model_get (model, &iter,
+                          OBJECT, &object,
+                          -1);
+      return object;
     }
-    return NULL;
+
+  return NULL;
 }
 
 static void
@@ -220,88 +226,103 @@ on_container_forall(GtkWidget *widget, gpointer data)
     *list = g_list_append(*list, widget);
 }
 
-static void
-append_widget(GtkTreeStore *model,
-              GtkWidget *widget,
-              GtkTreeIter *parent_iter)
+void
+parasite_widget_tree_append_object (ParasiteWidgetTree *widget_tree,
+                                    GObject            *object,
+                                    GtkTreeIter        *parent_iter)
 {
-    GtkTreeIter iter;
-    const char *class_name = G_OBJECT_CLASS_NAME(GTK_WIDGET_GET_CLASS(widget));
-    const char *name;
-    char *address;
-    gboolean realized;
-    gboolean mapped;
-    gboolean visible;
-    GList *l;
+  GtkTreeIter iter, object_iter;
+  const char *class_name = G_OBJECT_CLASS_NAME (G_OBJECT_GET_CLASS (object));
+  const char *name = NULL;
+  char *address;
+  gboolean realized;
+  gboolean mapped;
+  gboolean visible;
+  gboolean is_widget;
+  GList *l;
+  GParamSpec **props;
+  guint num_properties, i;
 
-    name = gtk_widget_get_name(widget);
-    if (name == NULL || strcmp(name, class_name) == 0) {
-        if (GTK_IS_LABEL(widget))
+  realized = mapped = visible = FALSE;
+
+  is_widget = GTK_IS_WIDGET (object);
+  if (is_widget)
+    {
+      GtkWidget *widget = GTK_WIDGET (object);
+      name = gtk_widget_get_name (GTK_WIDGET (object));
+
+      realized = gtk_widget_get_realized  (widget);
+      mapped = gtk_widget_get_mapped (widget);
+      visible = gtk_widget_get_visible (widget);
+    }
+
+  if (name == NULL || g_strcmp0 (name, class_name) == 0)
+    {
+      if (GTK_IS_LABEL (object))
         {
-            name = gtk_label_get_text(GTK_LABEL(widget));
+          name = gtk_label_get_text (GTK_LABEL (object));
         }
-        else if (GTK_IS_BUTTON(widget))
+      else if (GTK_IS_BUTTON (object))
         {
-            name = gtk_button_get_label(GTK_BUTTON(widget));
+          name = gtk_button_get_label (GTK_BUTTON (object));
         }
-        else if (GTK_IS_WINDOW(widget))
+      else if (GTK_IS_WINDOW (object))
         {
-            name = gtk_window_get_title(GTK_WINDOW(widget));
+          name = gtk_window_get_title (GTK_WINDOW (object));
         }
-        else
+      else
         {
-            name = "";
+          name = "";
         }
     }
 
-    address = g_strdup_printf("%p", widget);
+  address = g_strdup_printf ("%p", object);
 
-    realized = gtk_widget_get_realized(widget);
-    mapped = gtk_widget_get_mapped(widget);
-    visible = gtk_widget_get_visible(widget);
+  gtk_tree_store_append (widget_tree->priv->model, &iter, parent_iter);
+  gtk_tree_store_set (widget_tree->priv->model, &iter,
+                      OBJECT, object,
+                      OBJECT_TYPE, class_name,
+                      OBJECT_NAME, name,
+                      WIDGET_REALIZED, realized,
+                      WIDGET_MAPPED, mapped,
+                      WIDGET_VISIBLE, visible,
+                      OBJECT_ADDRESS, address,
+                      SENSITIVE, !is_widget || (realized && mapped && visible),
+                      -1);
+  g_hash_table_insert (widget_tree->priv->iters, object, gtk_tree_iter_copy (&iter));
 
-    gtk_tree_store_append(model, &iter, parent_iter);
-    gtk_tree_store_set(model, &iter,
-                       WIDGET, widget,
-                       WIDGET_TYPE, class_name,
-                       WIDGET_NAME, name,
-                       WIDGET_REALIZED, realized,
-                       WIDGET_MAPPED, mapped,
-                       WIDGET_VISIBLE, visible,
-                       WIDGET_ADDRESS, address,
-                       SENSITIVE, realized && mapped && visible,
-                       -1);
+  g_free(address);
 
-    g_free(address);
-
-    if (GTK_IS_CONTAINER(widget))
+  if (GTK_IS_CONTAINER (object))
     {
-        GList* children = NULL;
+      GList* children = NULL;
 
-        /* Pick up all children, including those that are internal. */
-        gtk_container_forall(GTK_CONTAINER(widget),
-                             on_container_forall, &children);
+      /* Pick up all children, including those that are internal. */
+      gtk_container_forall (GTK_CONTAINER (object),
+                            on_container_forall, &children);
 
-        for (l = children; l != NULL; l = l->next)
+      for (l = children; l != NULL; l = l->next)
         {
-            append_widget(model, GTK_WIDGET(l->data), &iter);
+          parasite_widget_tree_append_object (widget_tree, l->data, &iter);
         }
 
-        g_list_free(children);
+      g_list_free(children);
     }
 }
-
 
 void
-parasite_widget_tree_scan(ParasiteWidgetTree *widget_tree,
-                          GtkWidget *window)
+parasite_widget_tree_scan (ParasiteWidgetTree *widget_tree,
+                           GtkWidget          *window)
 {
-    gtk_tree_store_clear(widget_tree->priv->model);
-    append_widget(widget_tree->priv->model, window, NULL);
-    gtk_tree_view_columns_autosize(GTK_TREE_VIEW(widget_tree));
+  gtk_tree_store_clear (widget_tree->priv->model);
+  g_hash_table_remove_all (widget_tree->priv->iters);
+  parasite_widget_tree_append_object (widget_tree, G_OBJECT (window), NULL);
+
+  gtk_tree_view_columns_autosize (GTK_TREE_VIEW (widget_tree));
 }
 
 
+/*
 static GList *
 get_parents(GtkWidget *widget,
             GList *parents)
@@ -316,64 +337,82 @@ get_parents(GtkWidget *widget,
     return parents;
 }
 
-
-void
-parasite_widget_tree_select_widget(ParasiteWidgetTree *widget_tree,
-                                   GtkWidget *widget)
+gboolean
+parasite_widget_tree_find_widget (ParasiteWidgetTree *widget_tree,
+                                  GtkWidget          *widget,
+                                  GtkTreeIter        *iter)
 {
-    GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(widget_tree));
-    GList *parents = get_parents(widget, NULL);
-    GList *l;
-    GtkTreeIter iter, parent_iter = {0};
-    gboolean found = FALSE;
-    gboolean in_root = TRUE;
+  GList *parents = get_parents (widget, NULL);
+  GList *l;
+  GtkTreeIter inner_iter, parent_iter = {0};
+  gboolean found = FALSE;
+  gboolean in_root = TRUE;
 
-    for (l = parents; l != NULL; l = l->next)
+  for (l = parents; l != NULL; l = l->next)
     {
-        GtkWidget *cur_widget = GTK_WIDGET(l->data);
-        gboolean valid;
-        found = FALSE;
+      GtkWidget *cur_widget = GTK_WIDGET (l->data);
+      gboolean valid;
+      found = FALSE;
 
-        for (valid = gtk_tree_model_iter_children(model, &iter,
-                                                  in_root ? NULL
-                                                  : &parent_iter);
-              valid;
-              valid = gtk_tree_model_iter_next(model, &iter))
+      for (valid = gtk_tree_model_iter_children (widget_tree->priv->model,
+                                                 &inner_iter,
+                                                 in_root ? NULL : &parent_iter);
+           valid;
+           valid = gtk_tree_model_iter_next (widget_tree->priv->model, &inner_iter))
         {
-            GtkWidget *iter_widget;
-
-            gtk_tree_model_get(model, &iter,
-                               WIDGET, &iter_widget,
-                               -1);
-
-            if (iter_widget == cur_widget)
+          GtkWidget *iter_widget;
+          gtk_tree_model_get (widget_tree->priv->model,
+                              &inner_iter,
+                              WIDGET, &iter_widget,
+                              -1);
+          if (iter_widget == cur_widget)
             {
-                parent_iter = iter;
-                in_root = FALSE;
-                found = TRUE;
-                break;
+              parent_iter = inner_iter;
+              in_root = FALSE;
+              found = TRUE;
+              break;
             }
         }
-
-        if (!found)
-        {
-            /* No good. Bail.. */
-            break;
-        }
     }
 
-    if (found)
+  g_list_free(parents);
+
+  *iter = inner_iter;
+  return found;
+}
+*/
+
+gboolean
+parasite_widget_tree_find_object (ParasiteWidgetTree *widget_tree,
+                                  GObject            *object,
+                                  GtkTreeIter        *iter)
+{
+  GtkTreeIter *internal_iter = g_hash_table_lookup (widget_tree->priv->iters, object);
+  if (internal_iter)
     {
-        GtkTreePath *path = gtk_tree_model_get_path(model, &iter);
-        gtk_tree_view_expand_to_path(GTK_TREE_VIEW(widget_tree), path);
-        gtk_tree_selection_select_iter(
+      *iter = *internal_iter;
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+void
+parasite_widget_tree_select_object (ParasiteWidgetTree *widget_tree,
+                                    GObject            *object)
+{
+  GtkTreeIter iter;
+
+  if (parasite_widget_tree_find_object (widget_tree, object, &iter))
+    {
+      GtkTreePath *path = gtk_tree_model_get_path (GTK_TREE_MODEL (widget_tree->priv->model), &iter);
+      gtk_tree_view_expand_to_path(GTK_TREE_VIEW(widget_tree), path);
+      gtk_tree_selection_select_iter(
             gtk_tree_view_get_selection(GTK_TREE_VIEW(widget_tree)),
             &iter);
-        gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(widget_tree), path, NULL,
-                                     FALSE, 0, 0);
+      gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (widget_tree), path, NULL, FALSE, 0, 0);
     }
 
-    g_list_free(parents);
 }
 
 

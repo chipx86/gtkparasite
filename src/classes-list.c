@@ -300,6 +300,8 @@ parasite_classeslist_set_widget (ParasiteClassesList *cl,
   ParasiteClassesListByContext *c;
 
   gtk_list_store_clear (cl->priv->model);
+
+  gtk_widget_set_sensitive (GTK_WIDGET (cl), TRUE);
   widget_context = gtk_widget_get_style_context (widget);
 
   cl->priv->current_context = widget_context;
