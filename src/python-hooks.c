@@ -21,21 +21,15 @@
  * THE SOFTWARE.
  */
 #include <dlfcn.h>
-
 #include "config.h"
+#include <signal.h>
 
 #ifdef ENABLE_PYTHON
 # include <Python.h>
 # include <pygobject.h>
-# ifndef USE_GOBJECT_INTROSPECTION
-#  include <pygtk/pygtk.h>
-# endif // USE_GOBJECT_INTROSPECTION
-#endif // ENABLE_PYTHON
-
-#include <signal.h>
+#endif
 
 #include "python-hooks.h"
-
 
 static gboolean python_enabled = FALSE;
 
@@ -159,20 +153,24 @@ parasite_python_init(void)
         return;
     }
 
-#ifdef USE_GOBJECT_INTROSPECTION
-    //pygtk = PyImport_ImportModule("gtk");
     char *argv[] = { "", NULL };
     PySys_SetArgv(0, argv);
-#else
-    init_pygtk();
 
-    if (PyErr_Occurred())
-    {
-        fprintf(stderr, "Error initializing pygtk support.\n");
-        PyErr_Print();
+    if (!PyImport_ImportModule("gi._gobject"))
+      {
+        PyErr_SetString(PyExc_ImportError, "could not import gi.gobject");
         return;
-    }
-#endif // USE_GOBJECT_INTROSPECTION
+      }
+    if (!PyImport_ImportModule("gi.repository"))
+      {
+        PyErr_SetString(PyExc_ImportError, "could not import gi.repository");
+        return;
+      }
+    if (!PyImport_ImportModule("gi.repository.Gtk"))
+      {
+        PyErr_SetString(PyExc_ImportError, "could not import gtk");
+        return;
+      }
 
     python_enabled = TRUE;
 #endif // ENABLE_PYTHON

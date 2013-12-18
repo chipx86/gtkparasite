@@ -41,14 +41,13 @@ AM_PATH_PYTHON([2.4], [
     fi
     AC_SUBST(PYTHON_SHARED_LIB)
 
-        PKG_CHECK_MODULES(PYGTK,
-                          [pygobject-3.0 >= 3.0.0],
-                          [
-                            has_pygtk=yes
-                            AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
-                            AC_DEFINE(USE_GOBJECT_INTROSPECTION, [1], [Use GIR support for GTK+3])
-                          ],
-                          [has_pygtk=no])
+    PKG_CHECK_MODULES(PYGTK,
+                      [pygobject-3.0 >= 3.0.0],
+                      [
+                       has_pygtk=yes
+                       AC_DEFINE(ENABLE_PYTHON, [1], [Enable Python support])
+                      ],
+                      [has_pygtk=no])
 ], [has_python=no])
 
 AM_CONDITIONAL(ENABLE_PYTHON, [test x"$has_pygtk" = x"yes"])
