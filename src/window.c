@@ -26,6 +26,7 @@
 #include "prop-list.h"
 #include "classes-list.h"
 #include "css-editor.h"
+#include "object-hierarchy.h"
 #include "widget-tree.h"
 #include "python-hooks.h"
 #include "python-shell.h"
@@ -42,6 +43,8 @@ on_widget_tree_selection_changed (ParasiteWidgetTree *widget_tree,
     {
       parasite_proplist_set_object (PARASITE_PROPLIST (parasite->prop_list),
                                     selected);
+      parasite_objecthierarchy_set_object (PARASITE_OBJECTHIERARCHY (parasite->oh),
+                                           selected);
 
       if (GTK_IS_WIDGET (selected))
         {
@@ -262,6 +265,11 @@ gtkparasite_window_create()
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               create_prop_list_pane (window),
                               gtk_label_new ("GObject Properties"));
+
+    window->oh = parasite_objecthierarchy_new ();
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              window->oh,
+                              gtk_label_new ("Hierarchy"));
 
     window->classes_list = parasite_classeslist_new ();
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),

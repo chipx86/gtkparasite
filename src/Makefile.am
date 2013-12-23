@@ -20,7 +20,9 @@ libgtkparasite_la_SOURCES = \
 	classes-list.h \
 	classes-list.c \
 	css-editor.h \
-	css-editor.c
+	css-editor.c \
+	object-hierarchy.h \
+	object-hierarchy.c
 
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version -no-undefined \
