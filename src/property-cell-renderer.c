@@ -198,10 +198,6 @@ start_editing (GtkCellRenderer *renderer,
                  NULL);
 
     prop = g_object_class_find_property(G_OBJECT_GET_CLASS(object), name);
-
-    if (!(prop->flags & G_PARAM_WRITABLE))
-        return NULL;
-
     g_value_init(&gvalue, prop->value_type);
     g_object_get_property(object, name, &gvalue);
 
@@ -231,7 +227,12 @@ start_editing (GtkCellRenderer *renderer,
         g_value_unset (&gvalue);
         return NULL;
       }
-    else if (G_VALUE_HOLDS_ENUM(&gvalue) || G_VALUE_HOLDS_BOOLEAN(&gvalue))
+    else
+      {
+        if (!(prop->flags & G_PARAM_WRITABLE))
+          return NULL;
+
+     if (G_VALUE_HOLDS_ENUM(&gvalue) || G_VALUE_HOLDS_BOOLEAN(&gvalue))
     {
         GtkWidget *combobox = gtk_combo_box_text_new ();
         gtk_widget_show(combobox);
@@ -353,7 +354,7 @@ start_editing (GtkCellRenderer *renderer,
 
         editable = GTK_CELL_EDITABLE(spinbutton);
     }
-
+  }
     g_value_unset(&gvalue);
 
     if (!editable)

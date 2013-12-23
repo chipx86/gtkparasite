@@ -31,6 +31,7 @@ enum
   COLUMN_VALUE,
   COLUMN_OBJECT,
   COLUMN_TOOLTIP,
+  COLUMN_RO,
   NUM_COLUMNS
 };
 
@@ -97,6 +98,26 @@ query_tooltip_cb (GtkWidget        *widget,
 }
 
 static void
+draw_columns (GtkTreeViewColumn *column,
+              GtkCellRenderer   *renderer,
+              GtkTreeModel      *model,
+              GtkTreeIter       *iter,
+              ParasitePropList  *pl)
+{
+  gboolean ro;
+
+  gtk_tree_model_get (model, iter, COLUMN_RO, &ro, -1);
+  if (ro)
+    {
+      g_object_set (renderer, "foreground", "#a7aba7", NULL);
+    }
+  else
+    {
+      g_object_set (renderer, "foreground-set", FALSE, NULL);
+    }
+}
+
+static void
 constructed (GObject *object)
 {
   ParasitePropList *pl = PARASITE_PROPLIST (object);
@@ -112,7 +133,8 @@ constructed (GObject *object)
                                        G_TYPE_STRING,  // COLUMN_NAME
                                        G_TYPE_STRING,  // COLUMN_VALUE
                                        G_TYPE_OBJECT,  // COLUMN_OBJECT
-                                       G_TYPE_STRING); // COLUMN_TOOLTIP
+                                       G_TYPE_STRING,  // COLUMN_TOOLTIP
+                                       G_TYPE_BOOLEAN);// COLUMN_RO
   gtk_tree_view_set_model (GTK_TREE_VIEW (pl),
                            GTK_TREE_MODEL (pl->priv->model));
 
@@ -128,6 +150,11 @@ constructed (GObject *object)
                 "sort-order", GTK_SORT_ASCENDING,
                 "sort-column-id", COLUMN_NAME,
                 NULL);
+ gtk_tree_view_column_set_cell_data_func (pl->priv->property_column,
+                                          renderer,
+                                          (GtkTreeCellDataFunc) draw_columns,
+                                          pl,
+                                          NULL);
 
   renderer = parasite_property_cell_renderer_new ();
   g_object_set_data (G_OBJECT (renderer), "parasite-widget-tree", pl->priv->widget_tree);
@@ -146,6 +173,11 @@ constructed (GObject *object)
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (pl->priv->model),
                                         COLUMN_NAME,
                                         GTK_SORT_ASCENDING);
+ gtk_tree_view_column_set_cell_data_func (column,
+                                          renderer,
+                                          (GtkTreeCellDataFunc) draw_columns,
+                                          pl,
+                                          NULL);
 
   g_object_set (object, "has-tooltip", TRUE, NULL);
   g_signal_connect (object, "query-tooltip", G_CALLBACK (query_tooltip_cb), pl);
@@ -237,6 +269,7 @@ parasite_prop_list_update_prop (ParasitePropList *pl,
                       COLUMN_VALUE, value,
                       COLUMN_OBJECT, pl->priv->object,
                       COLUMN_TOOLTIP, g_param_spec_get_blurb (prop),
+                      COLUMN_RO, !(prop->flags & G_PARAM_WRITABLE),
                       -1);
 
   g_free (value);
