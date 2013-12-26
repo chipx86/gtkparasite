@@ -29,6 +29,7 @@ enum
 {
   COLUMN_NAME,
   COLUMN_VALUE,
+  COLUMN_DEFINED_AT,
   COLUMN_OBJECT,
   COLUMN_TOOLTIP,
   COLUMN_RO,
@@ -132,6 +133,7 @@ constructed (GObject *object)
   pl->priv->model = gtk_list_store_new(NUM_COLUMNS,
                                        G_TYPE_STRING,  // COLUMN_NAME
                                        G_TYPE_STRING,  // COLUMN_VALUE
+                                       G_TYPE_STRING,  // COLUMN_DEFINED_AT
                                        G_TYPE_OBJECT,  // COLUMN_OBJECT
                                        G_TYPE_STRING,  // COLUMN_TOOLTIP
                                        G_TYPE_BOOLEAN);// COLUMN_RO
@@ -178,6 +180,19 @@ constructed (GObject *object)
                                           (GtkTreeCellDataFunc) draw_columns,
                                           pl,
                                           NULL);
+
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (renderer, "scale", TREE_TEXT_SCALE, NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Defined at",
+                                                     renderer,
+                                                     "text", COLUMN_DEFINED_AT,
+                                                     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (pl), column);
+  gtk_tree_view_column_set_cell_data_func (column,
+                                           renderer,
+                                           (GtkTreeCellDataFunc) draw_columns,
+                                           pl,
+                                           NULL);
 
   g_object_set (object, "has-tooltip", TRUE, NULL);
   g_signal_connect (object, "query-tooltip", G_CALLBACK (query_tooltip_cb), pl);
@@ -267,6 +282,7 @@ parasite_prop_list_update_prop (ParasitePropList *pl,
   gtk_list_store_set (pl->priv->model, iter,
                       COLUMN_NAME, prop->name,
                       COLUMN_VALUE, value,
+                      COLUMN_DEFINED_AT, g_type_name (prop->owner_type),
                       COLUMN_OBJECT, pl->priv->object,
                       COLUMN_TOOLTIP, g_param_spec_get_blurb (prop),
                       COLUMN_RO, !(prop->flags & G_PARAM_WRITABLE),
