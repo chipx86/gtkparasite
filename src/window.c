@@ -31,6 +31,7 @@
 #include "python-hooks.h"
 #include "python-shell.h"
 #include "button-path.h"
+#include "themes.h"
 #include "config.h"
 
 static void
@@ -244,6 +245,11 @@ gtkparasite_window_create()
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               box,
                               gtk_label_new ("Widget Tree"));
+
+    gtk_notebook_append_page (GTK_NOTEBOOK (nb),
+                              parasite_themes_new (),
+                              gtk_label_new ("Themes"));
+
     gtk_notebook_append_page (GTK_NOTEBOOK (nb),
                               parasite_csseditor_new (TRUE),
                               gtk_label_new ("Custom CSS"));

@@ -22,7 +22,10 @@ libgtkparasite_la_SOURCES = \
 	css-editor.h \
 	css-editor.c \
 	object-hierarchy.h \
-	object-hierarchy.c
+	object-hierarchy.c \
+	themes.h themes.c
+
+libgtkparasite_la_CFLAGS = -DDATADIR=\"$(datadir)\"
 
 libgtkparasite_la_LDFLAGS = \
 	-rpath $(moduledir) -module -avoid-version -no-undefined \
