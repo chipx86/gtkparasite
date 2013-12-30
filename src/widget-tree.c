@@ -169,6 +169,8 @@ parasite_widget_tree_init (ParasiteWidgetTree *widget_tree)
                                                       NULL);
     gtk_tree_view_append_column(GTK_TREE_VIEW(widget_tree), column);
     gtk_tree_view_column_set_resizable(column, TRUE);
+
+  parasite_widget_tree_append_object (widget_tree, G_OBJECT (gtk_settings_get_default ()), NULL);
 }
 
 
@@ -316,6 +318,7 @@ parasite_widget_tree_scan (ParasiteWidgetTree *widget_tree,
 {
   gtk_tree_store_clear (widget_tree->priv->model);
   g_hash_table_remove_all (widget_tree->priv->iters);
+  parasite_widget_tree_append_object (widget_tree, G_OBJECT (gtk_settings_get_default ()), NULL);
   parasite_widget_tree_append_object (widget_tree, G_OBJECT (window), NULL);
 
   gtk_tree_view_columns_autosize (GTK_TREE_VIEW (widget_tree));
