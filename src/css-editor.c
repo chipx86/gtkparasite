@@ -128,7 +128,11 @@ create_toolbar (ParasiteCssEditor *editor)
 static void
 apply_system_font (GtkWidget *widget)
 {
-  GSettings *s = g_settings_new ("org.gnome.desktop.interface");
+  GSettingsSchema *schema = g_settings_schema_source_lookup (g_settings_schema_source_get_default (),
+                                                             "org.gnome.desktop.interface", FALSE);
+  if (!schema)
+      return;
+  GSettings *s = g_settings_new_full (schema, NULL, NULL);
   gchar *font_name = g_settings_get_string (s, "monospace-font-name");
   PangoFontDescription *font_desc = pango_font_description_from_string (font_name);
 
