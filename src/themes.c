@@ -121,6 +121,9 @@ create_gtk (ParasiteThemes *pt)
   path = g_build_filename (g_get_user_data_dir (), "themes", NULL);
   fill_gtk (path, t);
   g_free (path);
+  path = g_build_filename (g_get_home_dir (), ".themes", NULL);
+  fill_gtk (path, t);
+  g_free (path);
 
   c = gtk_combo_box_text_new ();
   gtk_container_add (GTK_CONTAINER (b), c);
