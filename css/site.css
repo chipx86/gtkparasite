@@ -57,6 +57,7 @@ ul {
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
   margin-top: 60px;
+  position: relative;
 }
 
 #main {
@@ -99,8 +100,8 @@ ul {
 
 #parasite-happy {
   position: absolute;
-  left: 40px;
-  top: 10px;
+  right: 0;
+  bottom: 0;
 }
 
 #parasite-smiling {
@@ -116,6 +117,7 @@ ul {
 }
 
 #title {
+  clear: both;
   font-size: 22pt;
   text-align: center;
   margin-bottom: 0;
@@ -130,6 +132,83 @@ ul {
 #screenshot-table td {
   vertical-align: top;
   margin: 0;
+}
+
+.welcome-banner {
+  position: relative;
+  margin: 0 auto;
+  max-width: 60em;
+  z-index: 10;
+}
+
+.bubble {
+  border: 2px #5E5E5E solid;
+  border-radius: 50%;
+  font-family: "Comic Neue";
+  font-size: 13pt;
+  line-height: 1.5;
+  margin: 0 150px 0 auto;
+  padding: 0;
+  text-align: center;
+  clear: left;
+  position: relative;
+  max-width: 40em;
+}
+
+.bubble::before {
+  box-sizing: border-box;
+  z-index: -1;
+  width: 60px;
+  content: "";
+  display: block;
+  height: 35px;
+  position: absolute;
+  bottom: 70px;
+  border-bottom: 2px #5E5E5E solid;
+  border-left: 2px #5E5E5E solid;
+  border-right: 2px transparent solid;
+  border-top: 2px transparent solid;
+  border-radius: 0 100%;
+  right: 0;
+}
+
+.bubble::after {
+  box-sizing: border-box;
+  z-index: -1;
+  width: 35px;
+  content: "";
+  display: block;
+  height: 35px;
+  position: absolute;
+  bottom: 70px;
+  border-bottom: 2px #5E5E5E solid;
+  border-left: 2px #5E5E5E solid;
+  border-right: 2px transparent solid;
+  border-top: 2px transparent solid;
+  border-radius: 0 100%;
+  right: 0;
+}
+
+.bubble__content {
+  background: white;
+  border-radius: inherit;
+  max-width: 100%;
+  padding: 2.5em 4em;
+  position: relative;
+  z-index: 1;
+}
+
+.bubble__content::before {
+  bottom: 88px;
+  position: absolute;
+  content: "";
+  display: block;
+  border-radius: 0;
+  border: 0;
+  width: 21px;
+  height: 21px;
+  background: white;
+  right: 35px;
 }
 
 .screenshot1 {
@@ -159,3 +238,10 @@ ul {
   height: 300px;
   padding: 90px 0 0 20px;
 }
+
+@media screen and (max-width: 800px) {
+  .bubble {
+    border-radius: 10em;
+  }
+}
+
