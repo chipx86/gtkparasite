@@ -101,7 +101,7 @@ create_gtk (ParasiteThemes *pt)
   char *theme, *default_theme, *path;
   GHashTableIter iter;
   int i, pos;
-  GSettings *settings;
+  GtkSettings *settings;
 
   b = g_object_new (GTK_TYPE_BOX,
                     "orientation", GTK_ORIENTATION_HORIZONTAL,
@@ -121,12 +121,15 @@ create_gtk (ParasiteThemes *pt)
   path = g_build_filename (g_get_user_data_dir (), "themes", NULL);
   fill_gtk (path, t);
   g_free (path);
+  path = g_build_filename (g_get_home_dir (), ".themes", NULL);
+  fill_gtk (path, t);
+  g_free (path);
 
   c = gtk_combo_box_text_new ();
   gtk_container_add (GTK_CONTAINER (b), c);
 
-  settings = g_settings_new ("org.gnome.desktop.interface");
-  default_theme = g_settings_get_string (settings, "gtk-theme");
+  settings = gtk_settings_get_default ();
+  g_object_get(settings, "gtk-theme-name", &default_theme, NULL);
   g_object_unref (settings);
 
   g_hash_table_iter_init (&iter, t);
